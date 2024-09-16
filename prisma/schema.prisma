@@ -20,6 +20,8 @@ model AlltimePersonalBests {
     Exercise    Exercises @relation(fields: [exercise_id], references: [id])
     setLog_id   String    @unique
     SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
+
+    @@index([user_id])
 }
 
 model DailyPersonalBests {
@@ -32,6 +34,8 @@ model DailyPersonalBests {
     Exercise    Exercises @relation(fields: [exercise_id], references: [id])
     setLog_id   String    @unique
     SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
+
+    @@index([user_id])
 }
 
 model Exercises {
@@ -47,6 +51,8 @@ model Exercises {
     SetLog               SetLog?
     AlltimePersonalBests AlltimePersonalBests?
     DailyPersonalBests   DailyPersonalBests?
+
+    @@index([user_id])
 }
 
 model ExerciseLog {
@@ -62,6 +68,8 @@ model ExerciseLog {
     notes         String?
 
     SetLog SetLog[]
+
+    @@index([user_id])
 }
 
 model SetLog {
@@ -78,11 +86,14 @@ model SetLog {
 
     AlltimePersonalBests AlltimePersonalBests?
     DailyPersonalBests   DailyPersonalBests?
+
+    @@index([exercise_id])
 }
 
 model User {
     id         String   @id @default(cuid())
     name       String
+    email      String
     created_at DateTime @default(now())
 
     Exercises            Exercises?
@@ -103,4 +114,6 @@ model WorkoutLog {
     notes            String?
 
     ExerciseLog ExerciseLog[]
+
+    @@index([user_id])
 }
