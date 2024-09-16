@@ -9,11 +9,111 @@ datasource db {
     relationMode = "prisma"
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+// Data models in alphabetical order
+model AlltimePersonalBests {
+    id          String    @id @default(cuid())
+    created_at  DateTime  @default(now())
+    updated_at  DateTime  @updatedAt
+    user_id     String    @unique
+    User        User      @relation(fields: [user_id], references: [id])
+    exercise_id String    @unique
+    Exercise    Exercises @relation(fields: [exercise_id], references: [id])
+    setLog_id   String    @unique
+    SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
 
-    @@index([name])
+    @@index([user_id])
+}
+
+model DailyPersonalBests {
+    id          String    @id @default(cuid())
+    created_at  DateTime  @default(now())
+    updated_at  DateTime  @updatedAt
+    user_id     String    @unique
+    User        User      @relation(fields: [user_id], references: [id])
+    exercise_id String    @unique
+    Exercise    Exercises @relation(fields: [exercise_id], references: [id])
+    setLog_id   String    @unique
+    SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
+
+    @@index([user_id])
+}
+
+model Exercises {
+    id            String   @id @default(cuid())
+    name          String
+    created_at    DateTime @default(now())
+    updated_at    DateTime @updatedAt
+    User          User     @relation(fields: [user_id], references: [id])
+    user_id       String   @unique
+    exercise_name String
+
+    ExerciseLog          ExerciseLog?
+    SetLog               SetLog?
+    AlltimePersonalBests AlltimePersonalBests?
+    DailyPersonalBests   DailyPersonalBests?
+
+    @@index([user_id])
+}
+
+model ExerciseLog {
+    id            String     @id @default(cuid())
+    created_at    DateTime   @default(now())
+    updated_at    DateTime   @updatedAt
+    User          User       @relation(fields: [user_id], references: [id])
+    user_id       String     @unique
+    WorkoutLog    WorkoutLog @relation(fields: [workoutLog_id], references: [id])
+    workoutLog_id String     @unique
+    Exercise      Exercises  @relation(fields: [exercise_id], references: [id])
+    exercise_id   String     @unique
+    notes         String?
+
+    SetLog SetLog[]
+
+    @@index([user_id])
+}
+
+model SetLog {
+    id             String      @id @default(cuid())
+    created_at     DateTime    @default(now())
+    updated_at     DateTime    @updatedAt
+    Exercise       Exercises   @relation(fields: [exercise_id], references: [id])
+    exercise_id    String      @unique
+    ExerciseLog    ExerciseLog @relation(fields: [exerciseLog_id], references: [id])
+    exerciseLog_id String      @unique
+    set_num        Int
+    weight         Int
+    reps           Int
+
+    AlltimePersonalBests AlltimePersonalBests?
+    DailyPersonalBests   DailyPersonalBests?
+
+    @@index([exercise_id])
+}
+
+model User {
+    id         String   @id @default(cuid())
+    name       String
+    email      String
+    created_at DateTime @default(now())
+
+    Exercises            Exercises?
+    WorkoutLog           WorkoutLog?
+    ExerciseLog          ExerciseLog?
+    AlltimePersonalBests AlltimePersonalBests?
+    DailyPersonalBests   DailyPersonalBests?
+}
+
+model WorkoutLog {
+    id               String   @id @default(cuid())
+    created_at       DateTime @default(now())
+    updated_at       DateTime @updatedAt
+    User             User     @relation(fields: [user_id], references: [id])
+    user_id          String   @unique
+    workout_name     String
+    duration_seconds Int
+    notes            String?
+
+    ExerciseLog ExerciseLog[]
+
+    @@index([user_id])
 }
