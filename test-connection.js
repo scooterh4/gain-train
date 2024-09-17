@@ -7,8 +7,8 @@ async function testConnection() {
     await prisma.$connect();
     console.log('Successfully connected to the database');
 
-    const data = await prisma.post.findMany()
-    console.log("heres the data", data)
+    // const data = await prisma.post.findMany()
+    // console.log("heres the data", data)
   } catch (error) {
     console.error('Failed to connect to the database:', error);
   } finally {
