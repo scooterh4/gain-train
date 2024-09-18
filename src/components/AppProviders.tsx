@@ -1,7 +1,6 @@
 import {
   useSupabaseClient,
   SessionContextProvider,
-  useUser,
 } from "@supabase/auth-helpers-react";
 import {
   createPagesBrowserClient,
@@ -10,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Button } from "./ui/button";
+import { AppLayout } from "./nav";
 
 interface RouteProviderProps {
   children: React.ReactNode;
@@ -42,10 +42,12 @@ export const RouteProvider = ({
 
   if (isLoggedIn) {
     return (
-      <div className="h-screen overflow-hidden flex flex-col">
-        <Header appTitle={appTitle} />
-        <div className="flex-grow overflow-y-auto py-4">{children}</div>
-      </div>
+      <AppLayout>
+        {/* <div className="h-screen overflow-hidden flex flex-col"> */}
+          <Header appTitle={appTitle} />
+          <div className="flex-grow overflow-y-auto py-4">{children}</div>
+        {/* </div> */}
+      </AppLayout>
     );
   }
   return <>{children}</>;

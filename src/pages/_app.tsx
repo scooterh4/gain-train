@@ -19,7 +19,7 @@ function MyApp({
       <AuthProvider
         initialSession={pageProps.initialSession}
         publicRoutes={publicRoutes}
-        appTitle="The Gain Train"
+        appTitle="The Gain Train 💪🚂"
       >
         <Component {...pageProps} />
       </AuthProvider>
