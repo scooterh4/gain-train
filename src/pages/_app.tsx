@@ -15,7 +15,7 @@ function MyApp({
   pageProps,
 }: AppProps<{ initialSession: Session }>) {
   return (
-    <main className="inset-0 flex min-h-screen flex-col bg-appa-dark-blue">
+    <main className="inset-0 bg-slate-700 flex min-h-screen flex-col">
       <AuthProvider
         initialSession={pageProps.initialSession}
         publicRoutes={publicRoutes}

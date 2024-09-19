@@ -96,7 +96,7 @@ export const Header = ({ appTitle }: { appTitle: string }) => {
     }
   };
   return (
-    <div className="h-16 bg-appa-gray-bg p-4 flex flex-row justify-between items-center">
+    <div className="h-16 p-4 flex flex-row justify-between items-center">
       <div className="text-2xl cursor-pointer" onClick={() => router.push("/")}>
         {appTitle}
       </div>

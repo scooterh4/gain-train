@@ -8,7 +8,7 @@ export function AppLayout({
   return (
     // <SignedInNavbar />
     // <div className="min-h-[1rem] w-full" />
-    <div className="flex min-h-full flex-grow flex-col rounded-t-3xl bg-appa-gray-bg sm:mx-auto sm:w-[640px] md:w-[768px]">
+    <div className="flex min-h-full flex-grow flex-col rounded-t-3xl bg-slate-400 sm:mx-auto sm:w-[640px] md:w-[768px]">
       {children}
       <div className="min-h-[6rem] w-full" />
       <MobileNavbar />
