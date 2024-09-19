@@ -15,7 +15,7 @@ model AlltimePersonalBests {
     created_at  DateTime  @default(now())
     updated_at  DateTime  @updatedAt
     user_id     String    @unique
-    User        User      @relation(fields: [user_id], references: [id])
+    AppUser     AppUser   @relation(fields: [user_id], references: [id])
     exercise_id String    @unique
     Exercise    Exercises @relation(fields: [exercise_id], references: [id])
     setLog_id   String    @unique
@@ -24,12 +24,26 @@ model AlltimePersonalBests {
     @@index([user_id])
 }
 
+model AppUser {
+    id         String   @id @default(cuid())
+    name       String
+    email      String
+    auth_uid   String
+    created_at DateTime @default(now())
+
+    Exercises            Exercises?
+    WorkoutLog           WorkoutLog?
+    ExerciseLog          ExerciseLog?
+    AlltimePersonalBests AlltimePersonalBests?
+    DailyPersonalBests   DailyPersonalBests?
+}
+
 model DailyPersonalBests {
     id          String    @id @default(cuid())
     created_at  DateTime  @default(now())
     updated_at  DateTime  @updatedAt
     user_id     String    @unique
-    User        User      @relation(fields: [user_id], references: [id])
+    AppUser     AppUser   @relation(fields: [user_id], references: [id])
     exercise_id String    @unique
     Exercise    Exercises @relation(fields: [exercise_id], references: [id])
     setLog_id   String    @unique
@@ -43,7 +57,7 @@ model Exercises {
     name          String
     created_at    DateTime @default(now())
     updated_at    DateTime @updatedAt
-    User          User     @relation(fields: [user_id], references: [id])
+    AppUser       AppUser  @relation(fields: [user_id], references: [id])
     user_id       String   @unique
     exercise_name String
 
@@ -59,7 +73,7 @@ model ExerciseLog {
     id            String     @id @default(cuid())
     created_at    DateTime   @default(now())
     updated_at    DateTime   @updatedAt
-    User          User       @relation(fields: [user_id], references: [id])
+    AppUser       AppUser    @relation(fields: [user_id], references: [id])
     user_id       String     @unique
     WorkoutLog    WorkoutLog @relation(fields: [workoutLog_id], references: [id])
     workoutLog_id String     @unique
@@ -90,24 +104,11 @@ model SetLog {
     @@index([exercise_id])
 }
 
-model User {
-    id         String   @id @default(cuid())
-    name       String
-    email      String
-    created_at DateTime @default(now())
-
-    Exercises            Exercises?
-    WorkoutLog           WorkoutLog?
-    ExerciseLog          ExerciseLog?
-    AlltimePersonalBests AlltimePersonalBests?
-    DailyPersonalBests   DailyPersonalBests?
-}
-
 model WorkoutLog {
     id               String   @id @default(cuid())
     created_at       DateTime @default(now())
     updated_at       DateTime @updatedAt
-    User             User     @relation(fields: [user_id], references: [id])
+    AppUser          AppUser  @relation(fields: [user_id], references: [id])
     user_id          String   @unique
     workout_name     String
     duration_seconds Int
