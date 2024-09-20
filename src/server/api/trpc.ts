@@ -7,7 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 import { createPagesServerClient, type User } from "@supabase/auth-helpers-nextjs";
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
@@ -93,6 +93,19 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
  */
 export const createCallerFactory = t.createCallerFactory;
 
+// check if the user is signed in, otherwise through a UNAUTHORIZED CODE
+const isAuthed = t.middleware(({ next, ctx }) => {
+  if (!ctx.authUser?.id) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      auth: ctx.authUser,
+    },
+  });
+});
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
  *
@@ -117,9 +130,9 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now();
 
   if (t._config.isDev) {
-    // artificial delay in dev
-    const waitMs = Math.floor(Math.random() * 400) + 100;
-    await new Promise((resolve) => setTimeout(resolve, waitMs));
+    // // artificial delay in dev
+    // const waitMs = Math.floor(Math.random() * 400) + 100;
+    // await new Promise((resolve) => setTimeout(resolve, waitMs));
   }
 
   const result = await next();
@@ -138,3 +151,4 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+export const protectedProcedure = t.procedure.use(isAuthed);
