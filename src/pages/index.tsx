@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Button } from "~/components/ui/button";
+import { WorkoutDialog } from "~/components/ui/general/workoutDialog";
 import { api } from "~/utils/api";
 
 export default function Home() {
@@ -6,14 +8,24 @@ export default function Home() {
 
   return (
     <>
-      <main className="flex min-h-screen flex-col bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <main className="flex px-2 min-h-screen space-y-2 flex-col bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         {/* <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16"> */}
         {!!user && (
-          <h1 className="text-3xl  my-2 font-bold tracking-tight text-white">
+          <h1 className="text-xl font-bold tracking-tight text-white">
               Hello <span className="text-[hsl(280,100%,70%)]">{user.name}</span>
           </h1>
             )}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
+          <h1 className="text-white text-[2rem]">
+            Quick start
+          </h1>
+          <div>
+          <WorkoutDialog>
+            <Button className="w-full">
+              Start new workout
+            </Button>
+          </WorkoutDialog>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
             <Link
               className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
               href="https://create.t3.gg/en/usage/first-steps"
