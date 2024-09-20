@@ -54,7 +54,6 @@ model DailyPersonalBests {
 
 model Exercises {
     id            String   @id @default(cuid())
-    name          String
     created_at    DateTime @default(now())
     updated_at    DateTime @updatedAt
     AppUser       AppUser  @relation(fields: [user_id], references: [id])
