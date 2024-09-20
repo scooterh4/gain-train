@@ -3,6 +3,7 @@ import { Dialog, DialogContent } from "../dialog";
 import { Button } from "../button";
 import { X } from "lucide-react";
 import { AddNewExerciseDialog } from "./addNewExerciseDialog";
+import { api } from "~/utils/api";
 
 export const ExercisesDialog = ({
   children,
@@ -10,7 +11,8 @@ export const ExercisesDialog = ({
   children: React.ReactNode;
 }): JSX.Element => {
 const [dialogOpen, setDialogOpen] = useState(false);
-
+const userExercises = api.exercise.getUserExercises.useQuery().data
+ console.log(userExercises)
 return (
   <>
     <div className="flex-grow" onClick={() => setDialogOpen(true)}>
@@ -28,11 +30,28 @@ return (
           </div>
 
         <AddNewExerciseDialog>
-          <Button>
+          <Button className="bg-green-500">
             New
           </Button>
         </AddNewExerciseDialog>
-
+        <div>
+          {!userExercises && (
+            <div className="text-white">No exercises {`:(`}</div>
+          )}
+        </div>
+        <div>
+          {!!userExercises && (
+            <h1 className="text-white text-xl">Your exercises</h1>
+          )}
+        </div>
+        <div>
+          {userExercises?.map((exercise) =>
+              <div key={exercise.id} className="text-white">
+                {exercise.exercise_name}
+              </div>
+            )
+          }
+        </div>
         <div className="absolute right-4 top-4">
           <Button
             variant="secondary"

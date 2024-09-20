@@ -31,11 +31,11 @@ model AppUser {
     auth_uid   String
     created_at DateTime @default(now())
 
-    Exercises            Exercises?
-    WorkoutLog           WorkoutLog?
-    ExerciseLog          ExerciseLog?
-    AlltimePersonalBests AlltimePersonalBests?
-    DailyPersonalBests   DailyPersonalBests?
+    Exercises            Exercises[]
+    WorkoutLog           WorkoutLog[]
+    ExerciseLog          ExerciseLog[]
+    AlltimePersonalBests AlltimePersonalBests[]
+    DailyPersonalBests   DailyPersonalBests[]
 }
 
 model DailyPersonalBests {
@@ -54,17 +54,16 @@ model DailyPersonalBests {
 
 model Exercises {
     id            String   @id @default(cuid())
-    name          String
     created_at    DateTime @default(now())
     updated_at    DateTime @updatedAt
     AppUser       AppUser  @relation(fields: [user_id], references: [id])
-    user_id       String   @unique
+    user_id       String  
     exercise_name String
 
-    ExerciseLog          ExerciseLog?
-    SetLog               SetLog?
-    AlltimePersonalBests AlltimePersonalBests?
-    DailyPersonalBests   DailyPersonalBests?
+    ExerciseLog          ExerciseLog[]
+    SetLog               SetLog[]
+    AlltimePersonalBests AlltimePersonalBests[]
+    DailyPersonalBests   DailyPersonalBests[]
 
     @@index([user_id])
 }
@@ -98,8 +97,8 @@ model SetLog {
     weight         Int
     reps           Int
 
-    AlltimePersonalBests AlltimePersonalBests?
-    DailyPersonalBests   DailyPersonalBests?
+    AlltimePersonalBests AlltimePersonalBests[]
+    DailyPersonalBests   DailyPersonalBests[]
 
     @@index([exercise_id])
 }

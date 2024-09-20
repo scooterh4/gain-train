@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent } from "../dialog";
 import { Button } from "../button";
 import { X } from "lucide-react";
 import { Input } from "../input";
-
+import { api } from "~/utils/api";
 
 export const AddNewExerciseDialog = ({
   children,
@@ -11,6 +11,25 @@ export const AddNewExerciseDialog = ({
   children: React.ReactNode;
 }): JSX.Element => {
 const [dialogOpen, setDialogOpen] = useState(false);
+const newExercise = useRef<string | undefined>(undefined)
+const utils = api.useUtils();
+const createNewExercise = api.exercise.createExercise.useMutation({
+  onSuccess:() => {
+    void utils.exercise.invalidate()
+  }
+})
+const saveNewExercise = () => {
+  console.log(newExercise.current)
+
+  if (!newExercise.current) {
+    return
+  }
+
+  createNewExercise.mutate({
+    name: newExercise.current
+  })
+  setDialogOpen(false)
+}
 
 return (
   <>
@@ -27,10 +46,10 @@ return (
               Create New Exercise
             </div>
             <div>
-              <Input placeholder="Add exercise name" />
+              <Input placeholder="Add exercise name" onChange={(e) => { newExercise.current = e.target.value }}/>
             </div>
             <div>
-              <Button className="bg-green-500 text-white">
+              <Button className="bg-green-500 text-white" onClick={saveNewExercise}>
                 Save
               </Button>
             </div>
