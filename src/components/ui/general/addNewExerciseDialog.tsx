@@ -5,7 +5,6 @@ import { X } from "lucide-react";
 import { Input } from "../input";
 import { api } from "~/utils/api";
 
-
 export const AddNewExerciseDialog = ({
   children,
 }: {
@@ -13,7 +12,12 @@ export const AddNewExerciseDialog = ({
 }): JSX.Element => {
 const [dialogOpen, setDialogOpen] = useState(false);
 const newExercise = useRef<string | undefined>(undefined)
-const createNewExercise = api.exercise.createExercise.useMutation()
+const utils = api.useUtils();
+const createNewExercise = api.exercise.createExercise.useMutation({
+  onSuccess:() => {
+    void utils.exercise.invalidate()
+  }
+})
 const saveNewExercise = () => {
   console.log(newExercise.current)
 
