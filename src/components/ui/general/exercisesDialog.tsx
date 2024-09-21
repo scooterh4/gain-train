@@ -1,18 +1,25 @@
-import { useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { Dialog, DialogContent } from "../dialog";
 import { Button } from "../button";
 import { X } from "lucide-react";
 import { AddNewExerciseDialog } from "./addNewExerciseDialog";
 import { api } from "~/utils/api";
+import { type Exercises } from "@prisma/client";
 
 export const ExercisesDialog = ({
+  setWorkoutExercises,
   children,
 }: {
+  setWorkoutExercises:  Dispatch<SetStateAction<Exercises[]>>
   children: React.ReactNode;
 }): JSX.Element => {
 const [dialogOpen, setDialogOpen] = useState(false);
 const userExercises = api.exercise.getUserExercises.useQuery().data
- console.log(userExercises)
+function onExerciseClicked(exercise: Exercises) {
+  setWorkoutExercises((prevExercises) => [...prevExercises, exercise])
+  setDialogOpen(false)
+}
+
 return (
   <>
     <div className="flex-grow" onClick={() => setDialogOpen(true)}>
@@ -46,9 +53,10 @@ return (
         </div>
         <div>
           {userExercises?.map((exercise) =>
-              <div key={exercise.id} className="text-white">
+              <Button key={exercise.id} className="text-white"
+                onClick={() => onExerciseClicked(exercise)}>
                 {exercise.exercise_name}
-              </div>
+              </Button>
             )
           }
         </div>

@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { WorkoutDialog } from "~/components/ui/general/workoutDialog";
+import { Input } from "~/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { api } from "~/utils/api";
 
 export default function Home() {
@@ -26,28 +27,39 @@ export default function Home() {
           </WorkoutDialog>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
+          <Table>
+            {/* <TableHeader>{exercise.exercise_name}</TableHeader> */}
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Set</TableHead>
+                <TableHead>Previous display</TableHead>
+                <TableHead>Weight</TableHead>
+                <TableHead className="text-right">Reps</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* {exercise.map((invoice) => ( */}
+                <TableRow>
+                  <TableCell className="font-medium">1</TableCell>
+                  <TableCell>165 x 4</TableCell>
+                  <TableCell><Input /></TableCell>
+                  <TableCell className="text-right"><Input /></TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">2</TableCell>
+                  <TableCell>170 x 4</TableCell>
+                  <TableCell><Input /></TableCell>
+                  <TableCell className="text-right"><Input /></TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">2</TableCell>
+                  <TableCell>175 x 4</TableCell>
+                  <TableCell><Input /></TableCell>
+                  <TableCell className="text-right"><Input /></TableCell>
+                </TableRow>
+              {/* ))} */}
+            </TableBody>
+          </Table>
           </div>
           <p className="text-2xl text-white">
               {/* {post?.map(post => (

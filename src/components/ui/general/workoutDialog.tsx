@@ -3,13 +3,20 @@ import { Dialog, DialogContent } from "../dialog";
 import { Button } from "../button";
 import { X } from "lucide-react";
 import { ExercisesDialog } from "./exercisesDialog";
+import { type Exercises } from "@prisma/client";
+import { ExerciseTableDisplay } from "./exerciseTableDisplay";
 
 export const WorkoutDialog = ({
   children,
 }: {
   children: React.ReactNode;
 }): JSX.Element => {
+console.log("Workout dialog render")
 const [dialogOpen, setDialogOpen] = useState(false);
+const [workoutExercises, setWorkoutExercises] = useState<Exercises[]>([])
+const clearExercises = () => {
+  setWorkoutExercises([])
+}
 
 return (
   <>
@@ -26,12 +33,26 @@ return (
               Gain time
             </div>
           </div>
-          <div>
-          <ExercisesDialog>
-            <Button>
-              Add Exercise
+          <div className="flex flex-row">
+            <ExercisesDialog setWorkoutExercises={setWorkoutExercises}>
+              <Button>
+                Add Exercise
+              </Button>
+            </ExercisesDialog>
+            <Button variant={"destructive"} onClick={clearExercises}>
+              Clear Exercises
             </Button>
-          </ExercisesDialog>
+          </div>
+          <div>
+            {workoutExercises.map(exercise => 
+            <div key={exercise.id} className="flex flex-row space-x-3">
+              {/* <ExerciseTableDisplay exercise={exercise} /> */}
+              <div>Set 1</div>
+              <div>{exercise.exercise_name}</div>
+              <div>Weight</div>
+              <div>Reps</div>
+            </div>
+            )}
           </div>
         </div> 
         <div className="absolute right-4 top-4">
