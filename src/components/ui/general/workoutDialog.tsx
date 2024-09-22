@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { ExercisesDialog } from "./exercisesDialog";
 import { type Exercises } from "@prisma/client";
 import { ExerciseTableDisplay } from "./exerciseTableDisplay";
+import { Table } from "../table";
 
 export const WorkoutDialog = ({
   children,
@@ -43,17 +44,12 @@ return (
               Clear Exercises
             </Button>
           </div>
-          <div>
-            {workoutExercises.map(exercise => 
-            <div key={exercise.id} className="flex flex-row space-x-3">
-              {/* <ExerciseTableDisplay exercise={exercise} /> */}
-              <div>Set 1</div>
-              <div>{exercise.exercise_name}</div>
-              <div>Weight</div>
-              <div>Reps</div>
-            </div>
-            )}
-          </div>
+          {workoutExercises.map((exercise) => 
+            <Table key={exercise.id}>
+              <ExerciseTableDisplay exercise={exercise}/>
+            </Table>
+          )}
+          
         </div> 
         <div className="absolute right-4 top-4">
           <Button
