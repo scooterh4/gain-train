@@ -1,6 +1,6 @@
 import { type AppUser } from "@prisma/client";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const exerciseRouter = createTRPCRouter({
   createExercise: protectedProcedure
@@ -35,6 +35,42 @@ export const exerciseRouter = createTRPCRouter({
       return await ctx.prisma.exercises.findMany({
         where: {
           user_id: user.id
+        }
+      })
+    }),
+
+  getPreviousSetsForExercise: protectedProcedure
+    .input(z.object({ exerciseId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const user: AppUser = await ctx.prisma.appUser.findFirstOrThrow({
+        where: {
+          auth_uid: ctx.authUser?.id
+        }
+      })
+
+      const prevExercise = await ctx.prisma.exerciseLog.findFirst({
+        where: {
+          AND: [
+            { AppUser: user },
+            { exercise_id: input.exerciseId }
+          ]
+        },
+        orderBy: {
+          created_at: "desc"
+        }
+      })
+
+      if (!prevExercise) {
+        console.log("No previous exercise")
+        return
+      }
+
+      return await ctx.prisma.setLog.findMany({
+        where: {
+          exerciseLog_id: prevExercise.id
+        },
+        orderBy: {
+          set_num: "asc"
         }
       })
     })
