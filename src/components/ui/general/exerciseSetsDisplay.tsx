@@ -4,7 +4,8 @@ import { Input } from "../input";
 import { api } from "~/utils/api";
 import { useEffect, useState } from "react";
 import { Button } from "../button";
-import { Trash2Icon } from "lucide-react";
+import { CircleEllipsisIcon, Trash2Icon } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../dropdown-menu";
 
 type DisplaySets = {
   exercise_id: string,
@@ -25,11 +26,19 @@ const emptySet = (exerciseId: string, setNum: number) => {
 }
 
 export const ExerciseTableDisplay = (
-  {exercise}: {exercise: Exercises}
+  {
+    exercise,
+    removeExercise
+  }: 
+  {
+    exercise: Exercises;
+    removeExercise: (exerciseId: string) => void
+  }
 ) => {
   const prevSets = api.exercise.getPreviousSetsForExercise.useQuery({
     exerciseId: exercise.id
   }).data
+  const [ displaySets, setDisplaySets ] = useState<DisplaySets[]>([])
 
   useEffect(() => {
     if (!prevSets) {
@@ -49,8 +58,6 @@ export const ExerciseTableDisplay = (
       }))
     }
   }, [prevSets])
-
-  const [ displaySets, setDisplaySets ] = useState<DisplaySets[]>([])
 
   const addSetToExercise = () => {
     const lastSet = displaySets[displaySets.length - 1]?.set_num
@@ -74,7 +81,19 @@ export const ExerciseTableDisplay = (
 
   return (
     <>
-      <TableHeader className="text-right">{exercise.exercise_name}</TableHeader> 
+      <TableHeader>
+        <TableRow>
+          <TableHead className="text-center">{exercise.exercise_name}</TableHead>
+          <TableHead className="text-right">
+            <EditExerciseDropdownMenu 
+              exerciseId={exercise.id}
+              removeExercise={() => removeExercise(exercise.id)}
+            >
+              <CircleEllipsisIcon/>
+            </EditExerciseDropdownMenu>
+          </TableHead>
+        </TableRow>
+      </TableHeader> 
       <TableHeader>
         <TableRow>
           <TableHead className="w-[30px]">Set</TableHead>
@@ -102,5 +121,32 @@ export const ExerciseTableDisplay = (
         </Button>
       </TableFooter>
     </>
+  )
+}
+
+function EditExerciseDropdownMenu(
+  { 
+    children, exerciseId, removeExercise 
+  }: { 
+    children: React.ReactNode;
+    exerciseId: string;
+    removeExercise: (exerciseId: string) => void; 
+  }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        {children}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Exercise Actions</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => removeExercise(exerciseId)}>
+            <Trash2Icon className="mr-2 h-4 w-4" />
+            <span>Remove exercise</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
