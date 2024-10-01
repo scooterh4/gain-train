@@ -2,22 +2,21 @@ import { type Exercises } from "@prisma/client";
 import { TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "../table";
 import { Input } from "../input";
 import { api } from "~/utils/api";
-import { useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { Button } from "../button";
 import { CircleEllipsisIcon, Trash2Icon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../dropdown-menu";
+import { WorkoutContext } from "./workoutDialog";
 
-type DisplaySets = {
-  exercise_id: string,
+export type DisplaySets = {
   prev_set: string,
   set_num: number,
   weight: number | null,
   reps: number | null,
 }
 
-const emptySet = (exerciseId: string, setNum: number) => {
+export const emptySet = (setNum: number) => {
   return {
-    exercise_id: exerciseId,
     prev_set: "",
     set_num: setNum,
     weight: null,
@@ -25,57 +24,51 @@ const emptySet = (exerciseId: string, setNum: number) => {
   }
 }
 
-export const ExerciseTableDisplay = (
-  {
+export const ExerciseTableDisplay = ({
     exercise,
-    removeExercise
+    sets,
   }: 
   {
     exercise: Exercises;
-    removeExercise: (exerciseId: string) => void
+    sets: DisplaySets[];
   }
 ) => {
   const prevSets = api.exercise.getPreviousSetsForExercise.useQuery({
     exerciseId: exercise.id
   }).data
-  const [ displaySets, setDisplaySets ] = useState<DisplaySets[]>([])
+  const { 
+    workoutExercises, 
+    removeExercise, 
+    setExerciseSets, 
+    addExtraSetToExercise, 
+    popSetFromExercise
+  } = useContext(WorkoutContext)
 
   useEffect(() => {
-    if (!prevSets) {
-      setDisplaySets([1, 2, 3].map(num => {
-        return emptySet(exercise.id, num);
-      }))
-    }
-    else {
-      setDisplaySets(prevSets.map(set => {
-        return {
-          exercise_id: set.exercise_id,
+    const currentExer = workoutExercises.find((exer) => exer.exercise === exercise);
+  
+    // Check if the sets are already initialized to avoid re-triggering the effect
+    if (currentExer?.sets.length === 0) {
+      let newSets: DisplaySets[] = [];
+  
+      if (!prevSets) {
+        newSets = [1, 2, 3].map(num => emptySet(num));
+      } else {
+        newSets = prevSets.map(set => ({
           prev_set: `${set.weight} x ${set.reps}`,
           set_num: set.set_num,
           weight: null,
-          reps: null
-        };
-      }))
+          reps: null,
+        }));
+      }
+  
+      setExerciseSets(exercise, newSets);
     }
-  }, [prevSets])
-
-  const addSetToExercise = () => {
-    const lastSet = displaySets[displaySets.length - 1]?.set_num
-    if (!lastSet || lastSet === undefined) {
-      console.log("Last set is undefined for exercise id", exercise.id)
-    }
-    else {
-      setDisplaySets((prevSets) => [...prevSets, emptySet(exercise.id, lastSet + 1)])
-    }
-  }
+  }, [prevSets]);
 
   const deleteSet = (setNum: number) => {
-    if (setNum === displaySets.length) {
-      setDisplaySets((prevSets) => {
-        const sets = [...prevSets]
-        sets.pop()
-        return sets
-      })
+    if (setNum === sets.length) {
+      popSetFromExercise(exercise)
     }
   }
 
@@ -87,7 +80,7 @@ export const ExerciseTableDisplay = (
           <TableHead className="text-right">
             <EditExerciseDropdownMenu 
               exerciseId={exercise.id}
-              removeExercise={() => removeExercise(exercise.id)}
+              removeExercise={() => removeExercise(exercise)}
             >
               <CircleEllipsisIcon/>
             </EditExerciseDropdownMenu>
@@ -103,20 +96,20 @@ export const ExerciseTableDisplay = (
         </TableRow>
       </TableHeader>
       <TableBody>
-        {displaySets.map((set => 
+        {sets.map((set => 
           <TableRow key={set.set_num}>
             <TableCell className="font-medium">{set.set_num}</TableCell>
             <TableCell>{set.prev_set}</TableCell>
             <TableCell><Input type="number" /></TableCell>
             <TableCell className="text-right"><Input type="number" /></TableCell>
             <TableCell onClick={() => deleteSet(set.set_num)}>
-              <Trash2Icon className={`${set.set_num !== displaySets.length ? "text-gray-300" : ""}`} />
+              <Trash2Icon className={`${set.set_num !== sets.length ? "text-gray-300" : ""}`} />
             </TableCell>
           </TableRow>
         ))}
       </TableBody>
       <TableFooter className="w-full">
-        <Button className="w-full" onClick={addSetToExercise}>
+        <Button className="w-full" onClick={() => addExtraSetToExercise(exercise)}>
           Add set
         </Button>
       </TableFooter>
@@ -126,7 +119,9 @@ export const ExerciseTableDisplay = (
 
 function EditExerciseDropdownMenu(
   { 
-    children, exerciseId, removeExercise 
+    children, 
+    exerciseId, 
+    removeExercise 
   }: { 
     children: React.ReactNode;
     exerciseId: string;

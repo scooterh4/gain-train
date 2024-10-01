@@ -1,4 +1,4 @@
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent } from "../dialog";
 import { Button } from "../button";
 import { X } from "lucide-react";
@@ -7,16 +7,16 @@ import { api } from "~/utils/api";
 import { type Exercises } from "@prisma/client";
 
 export const ExercisesDialog = ({
-  setWorkoutExercises,
+  addExercise,
   children,
 }: {
-  setWorkoutExercises:  Dispatch<SetStateAction<Exercises[]>>
+  addExercise: (exercise: Exercises) => void;
   children: React.ReactNode;
 }): JSX.Element => {
 const [dialogOpen, setDialogOpen] = useState(false);
 const userExercises = api.exercise.getUserExercises.useQuery().data
 function onExerciseClicked(exercise: Exercises) {
-  setWorkoutExercises((prevExercises) => [...prevExercises, exercise])
+  addExercise(exercise)
   setDialogOpen(false)
 }
 
