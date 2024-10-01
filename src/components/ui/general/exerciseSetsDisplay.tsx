@@ -1,4 +1,3 @@
-import { type Exercises } from "@prisma/client";
 import { TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "../table";
 import { Input } from "../input";
 import { api } from "~/utils/api";
@@ -6,7 +5,7 @@ import { useContext, useEffect } from "react";
 import { Button } from "../button";
 import { CircleEllipsisIcon, Trash2Icon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../dropdown-menu";
-import { WorkoutContext } from "./workoutDialog";
+import { ExerciseDisplay, WorkoutContext } from "./workoutDialog";
 
 export type DisplaySets = {
   prev_set: string,
@@ -29,7 +28,7 @@ export const ExerciseTableDisplay = ({
     sets,
   }: 
   {
-    exercise: Exercises;
+    exercise: ExerciseDisplay;
     sets: DisplaySets[];
   }
 ) => {
@@ -109,7 +108,7 @@ export const ExerciseTableDisplay = ({
         ))}
       </TableBody>
       <TableFooter className="w-full">
-        <Button className="w-full" onClick={() => addExtraSetToExercise(exercise)}>
+        <Button className="w-full" onMouseDown={() => addExtraSetToExercise(exercise)}>
           Add set
         </Button>
       </TableFooter>

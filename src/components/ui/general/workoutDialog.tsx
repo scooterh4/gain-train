@@ -8,17 +8,21 @@ import { Table } from "../table";
 import { api } from "~/utils/api";
 import { type Exercises } from "@prisma/client";
 
+export interface ExerciseDisplay extends Exercises {
+  addedAt: number
+}
+
 export type WorkoutExerciseWithSets = { 
-  exercise: Exercises, 
+  exercise: ExerciseDisplay, 
   sets: DisplaySets[]
 }
 
 export const WorkoutContext = createContext<{
   workoutExercises: WorkoutExerciseWithSets[];
-  removeExercise: (exercise: Exercises) => void;
-  setExerciseSets: (exercise: Exercises, sets: DisplaySets[]) => void;
-  addExtraSetToExercise: (exercise: Exercises) => void;
-  popSetFromExercise: (exercise: Exercises) => void;
+  removeExercise: (exercise: ExerciseDisplay) => void;
+  setExerciseSets: (exercise: ExerciseDisplay, sets: DisplaySets[]) => void;
+  addExtraSetToExercise: (exercise: ExerciseDisplay) => void;
+  popSetFromExercise: (exercise: ExerciseDisplay) => void;
 }>({
   workoutExercises: [],
   removeExercise: () => { return },
@@ -38,7 +42,13 @@ export const WorkoutDialog = ({
   // const logWorkout = api.workout.logWorkout
 
   const addExercise = (exercise: Exercises) => {
-    const newExercises = [...workoutExercises, { exercise, sets: [] }];
+    const newExercises = [
+      ...workoutExercises, 
+      { 
+        exercise: { ...exercise, addedAt: Date.now() },
+        sets: [] 
+      }
+    ];
     setWorkoutExercises(newExercises);
   };
 
@@ -50,17 +60,17 @@ export const WorkoutDialog = ({
     console.log("Its done!")
   }
 
-  const removeExercise = (exercise: Exercises) => {
+  const removeExercise = (exercise: ExerciseDisplay) => {
     setWorkoutExercises(prev => prev.filter(ex => ex.exercise !== exercise));
   }
 
-  const setExerciseSets = (exercise: Exercises, sets: DisplaySets[]) => {
+  const setExerciseSets = (exercise: ExerciseDisplay, sets: DisplaySets[]) => {
     setWorkoutExercises(prev => prev.map(ex => 
       ex.exercise === exercise ? { ...ex, sets } : ex
     ));
   }
 
-  const addExtraSetToExercise = (exercise: Exercises) => {
+  const addExtraSetToExercise = (exercise: ExerciseDisplay) => {
     setWorkoutExercises(prev => prev.map(ex => {
       if (ex.exercise === exercise) {
         const newSet: DisplaySets = emptySet(ex.sets.length + 1);
@@ -70,7 +80,7 @@ export const WorkoutDialog = ({
     }));
   }
 
-  const popSetFromExercise = (exercise: Exercises) => {
+  const popSetFromExercise = (exercise: ExerciseDisplay) => {
     setWorkoutExercises(prev => prev.map(ex => {
       if (ex.exercise !== exercise) {
         return { ...ex }
