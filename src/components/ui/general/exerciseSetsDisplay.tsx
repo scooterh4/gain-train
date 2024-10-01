@@ -47,12 +47,16 @@ export const ExerciseTableDisplay = ({
     const currentExer = workoutExercises.find((exer) => exer.exercise === exercise);
   
     // Check if the sets are already initialized to avoid re-triggering the effect
-    if (currentExer?.sets.length === 0) {
+    console.log("currentExer?.sets", currentExer?.sets)
+    if (
+      currentExer?.sets.length === 0 || prevSets !== undefined
+    ) {
       let newSets: DisplaySets[] = [];
   
       if (!prevSets) {
         newSets = [1, 2, 3].map(num => emptySet(num));
       } else {
+        
         newSets = prevSets.map(set => ({
           prev_set: `${set.weight} x ${set.reps}`,
           set_num: set.set_num,
