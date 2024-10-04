@@ -51,7 +51,7 @@ export const ExerciseTableDisplay = ({
       let newSets: DisplaySets[] = [];
   
       if (!prevSets) {
-        newSets = [1, 2, 3].map(num => emptySet(num));
+        newSets = [ emptySet(1) ]
       } else {
         
         newSets = prevSets.map(set => ({

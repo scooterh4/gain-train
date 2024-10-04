@@ -4,6 +4,8 @@ import { Button } from "../button";
 import { X } from "lucide-react";
 import { Input } from "../input";
 import { api } from "~/utils/api";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { ExerciseType } from "@prisma/client";
 
 export const AddNewExerciseDialog = ({
   children,
@@ -12,7 +14,11 @@ export const AddNewExerciseDialog = ({
 }): JSX.Element => {
 const [dialogOpen, setDialogOpen] = useState(false);
 const newExercise = useRef<string | undefined>(undefined)
+const [ newExerciseType, setNewExerciseType ] = useState<string | null>(null)
+const [ error, setError ] = useState({ exerciseType: false, exerciseName: false })
 const utils = api.useUtils();
+const exerciseTypes = api.exercise.getExerciseTypes.useQuery().data
+
 const createNewExercise = api.exercise.createExercise.useMutation({
   onSuccess:() => {
     void utils.exercise.invalidate()
@@ -21,15 +27,26 @@ const createNewExercise = api.exercise.createExercise.useMutation({
 const saveNewExercise = () => {
   console.log(newExercise.current)
 
-  if (!newExercise.current) {
+  if (!newExercise.current || !newExerciseType) {
+    setError({
+      exerciseType: !newExerciseType,
+      exerciseName: !newExercise.current
+    })
     return
   }
 
   createNewExercise.mutate({
-    name: newExercise.current
+    name: newExercise.current,
+    exercise_type: newExerciseType
+  })
+  setNewExerciseType(null)
+  setError({
+    exerciseType: false,
+    exerciseName: false,
   })
   setDialogOpen(false)
 }
+
 
 return (
   <>
@@ -45,8 +62,26 @@ return (
             <div className="mb-2 text-xl font-medium">
               Create New Exercise
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <span className={error.exerciseType ? 'bg-red-500' : ''}>{ newExerciseType ?? 'Select exercise type' }</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 text-black bg-white">
+                <DropdownMenuGroup>
+                  {exerciseTypes?.map(type => 
+                    <DropdownMenuItem key={type.id} onClick={() => setNewExerciseType(type.name)}>
+                      {type.name}  
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div>
-              <Input placeholder="Add exercise name" onChange={(e) => { newExercise.current = e.target.value }}/>
+              <Input 
+                placeholder="Add exercise name" 
+                className={error.exerciseName ? 'bg-red-500' : ''} 
+                onChange={(e) => { newExercise.current = e.target.value }} 
+              />
             </div>
             <div>
               <Button className="bg-green-500 text-white" onClick={saveNewExercise}>
@@ -61,6 +96,7 @@ return (
             size="icon"
             className="h-8 w-8"
             onClick={() => {
+              setNewExerciseType(null)
               setDialogOpen(false);
             }}
           >
