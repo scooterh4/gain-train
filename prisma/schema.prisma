@@ -58,13 +58,16 @@ model Exercise {
   updated_at           DateTime               @updatedAt
   user_id              String
   exercise_name        String
+  exercise_type_id     String                 // Foreign key to the ExerciseType table
   AppUser              AppUser                @relation(fields: [user_id], references: [id])
+  ExerciseType         ExerciseType           @relation(fields: [exercise_type_id], references: [id])
   ExerciseLog          ExerciseLog[]
   SetLog               SetLog[]
   AlltimePersonalBests AlltimePersonalBests[]
   DailyPersonalBests   DailyPersonalBests[]
 
   @@index([user_id])
+  @@index([exercise_type_id])
 }
 
 model ExerciseLog {
@@ -85,6 +88,15 @@ model ExerciseLog {
   @@index([workoutLog_id])
 }
 
+model ExerciseType {
+  id              String     @id @default(cuid())
+  name            String     // e.g., "normal_weighted" or "weighted_bodyweight"
+  requires_weight Boolean    // Indicates if weight is required
+  requires_reps   Boolean    // Indicates if reps are required
+
+  Exercise       Exercise[]
+}
+
 model SetLog {
   id                   String                 @id @default(cuid())
   created_at           DateTime               @default(now())
@@ -92,7 +104,7 @@ model SetLog {
   exercise_id          String                 
   exerciseLog_id       String                 
   set_num              Int
-  weight               Int
+  weight               Int?                   // Optional weight for bodyweight exercises
   reps                 Int
   Exercise             Exercise               @relation(fields: [exercise_id], references: [id])
   ExerciseLog          ExerciseLog            @relation(fields: [exerciseLog_id], references: [id])
