@@ -1,5 +1,4 @@
 import { type AppUser } from "@prisma/client";
-import { connect } from "http2";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
@@ -114,7 +113,7 @@ export const userRouter = createTRPCRouter({
             }
           })
 
-          const sets = exer.sets.map((set) => {
+          const definedSets = exer.sets.map((set) => {
             if (set.weight && set.reps) {
               return {
                 exercise_id: exer.exercise.id,
@@ -127,7 +126,13 @@ export const userRouter = createTRPCRouter({
           })
           .filter(set => set !== undefined)
 
-          console.log("We should get this far")
+          // adjust set numbers
+          const sets = definedSets.map((set, index) => {
+            return {
+              ...set,
+              set_num: index + 1 
+            }
+          }) 
 
           await ctx.prisma.setLog.createMany({
             data: sets
