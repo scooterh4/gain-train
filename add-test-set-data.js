@@ -19,7 +19,7 @@ async function testConnection() {
     }
 
     // Bench exercise id: cm1e5rna10001hoxeygvfr1ks
-    const exercise = await prisma.exercises.findFirst({
+    const exercise = await prisma.exercise.findFirst({
       where: {
         id: "cm1e5rna10001hoxeygvfr1ks"
       }

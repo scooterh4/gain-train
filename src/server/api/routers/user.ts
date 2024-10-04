@@ -1,6 +1,7 @@
 import { type AppUser } from "@prisma/client";
+import { connect } from "http2";
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
 export const userRouter = createTRPCRouter({
   helloUser: publicProcedure
@@ -55,5 +56,85 @@ export const userRouter = createTRPCRouter({
     });
 
     return users ?? null;
+  }),
+
+  logWorkout: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          exercise: z.object({ 
+            id: z.string(),
+            created_at: z.date(),
+            updated_at: z.date(),
+            user_id: z.string(),
+            exercise_name: z.string(),
+            addedAt: z.number() 
+          }),
+          sets: z.array(
+            z.object({
+              prev_set: z.string(),
+              set_num: z.number(),
+              weight: z.number().nullable(),
+              reps: z.number().nullable()
+            })
+          )
+        })
+      )
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user: AppUser = await ctx.prisma.appUser.findFirstOrThrow({
+        where: {
+          auth_uid: ctx.authUser?.id
+        }
+      })
+
+      if (!user) {
+        return
+      }
+
+      try {
+        const workoutLog = await ctx.prisma.workoutLog.create({
+          data: {
+            AppUser: {
+              connect: user
+            },
+            workout_name: `Test workout ${Math.random() * 1000}`,
+            duration_seconds: 60 * 60 * 2,
+            notes: "Nothing new" 
+          }
+        })
+
+        for (const exer of input) {
+          const exerciseLog = await ctx.prisma.exerciseLog.create({
+            data: {
+              user_id: user.id,     
+              workoutLog_id: workoutLog.id,  
+              exercise_id : exer.exercise.id,
+              notes: ""
+            }
+          })
+
+          const sets = exer.sets.map((set) => {
+            if (set.weight && set.reps) {
+              return {
+                exercise_id: exer.exercise.id,
+                exerciseLog_id: exerciseLog.id,
+                set_num: set.set_num,
+                weight: set.weight,
+                reps: set.reps,
+              }
+            }
+          })
+          .filter(set => set !== undefined)
+
+          console.log("We should get this far")
+
+          await ctx.prisma.setLog.createMany({
+            data: sets
+          })
+        }
+      } catch (error) {
+        console.log("Error processing request", error);
+      }
   }),
 });

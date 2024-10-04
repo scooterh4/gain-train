@@ -5,7 +5,7 @@ import { useContext, useEffect } from "react";
 import { Button } from "../button";
 import { CircleEllipsisIcon, Trash2Icon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../dropdown-menu";
-import { ExerciseDisplay, WorkoutContext } from "./workoutDialog";
+import { type ExerciseDisplay, WorkoutContext } from "./workoutDialog";
 
 export type DisplaySets = {
   prev_set: string,
@@ -30,27 +30,24 @@ export const ExerciseTableDisplay = ({
   {
     exercise: ExerciseDisplay;
     sets: DisplaySets[];
-  }
-) => {
+  }) => {
   const prevSets = api.exercise.getPreviousSetsForExercise.useQuery({
     exerciseId: exercise.id
   }).data
   const { 
     workoutExercises, 
     removeExercise, 
-    setExerciseSets, 
+    updateExerciseData, 
     addExtraSetToExercise, 
-    popSetFromExercise
+    popSetFromExercise,
+    updateSetDataForExercise
   } = useContext(WorkoutContext)
 
   useEffect(() => {
     const currentExer = workoutExercises.find((exer) => exer.exercise === exercise);
   
     // Check if the sets are already initialized to avoid re-triggering the effect
-    console.log("currentExer?.sets", currentExer?.sets)
-    if (
-      currentExer?.sets.length === 0 || prevSets !== undefined
-    ) {
+    if (currentExer?.sets.length === 0 || prevSets !== undefined) {
       let newSets: DisplaySets[] = [];
   
       if (!prevSets) {
@@ -65,7 +62,7 @@ export const ExerciseTableDisplay = ({
         }));
       }
   
-      setExerciseSets(exercise, newSets);
+      updateExerciseData(exercise, newSets);
     }
   }, [prevSets]);
 
@@ -103,8 +100,16 @@ export const ExerciseTableDisplay = ({
           <TableRow key={set.set_num}>
             <TableCell className="font-medium">{set.set_num}</TableCell>
             <TableCell>{set.prev_set}</TableCell>
-            <TableCell><Input type="number" /></TableCell>
-            <TableCell className="text-right"><Input type="number" /></TableCell>
+            <TableCell>
+              <Input onBlur={(e) => { 
+                updateSetDataForExercise(exercise, set.set_num, "weight", e.target.value)
+              }} type="number" />
+            </TableCell>
+            <TableCell className="text-right">
+              <Input onBlur={(e) => { 
+                updateSetDataForExercise(exercise, set.set_num, "reps", e.target.value)
+              }} type="number" />
+            </TableCell>
             <TableCell onClick={() => deleteSet(set.set_num)}>
               <Trash2Icon className={`${set.set_num !== sets.length ? "text-gray-300" : ""}`} />
             </TableCell>

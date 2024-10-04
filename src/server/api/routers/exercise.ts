@@ -12,7 +12,7 @@ export const exerciseRouter = createTRPCRouter({
         }
       })
 
-      await ctx.prisma.exercises.create({
+      await ctx.prisma.exercise.create({
         data: {
           exercise_name: input.name,
           AppUser: {
@@ -32,7 +32,7 @@ export const exerciseRouter = createTRPCRouter({
         }
       })
 
-      return await ctx.prisma.exercises.findMany({
+      return await ctx.prisma.exercise.findMany({
         where: {
           user_id: user.id
         }

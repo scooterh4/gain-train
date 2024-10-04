@@ -6,9 +6,9 @@ import { ExercisesDialog } from "./exercisesDialog";
 import { type DisplaySets, emptySet, ExerciseTableDisplay } from "./exerciseSetsDisplay";
 import { Table } from "../table";
 import { api } from "~/utils/api";
-import { type Exercises } from "@prisma/client";
+import { type Exercise } from "@prisma/client";
 
-export interface ExerciseDisplay extends Exercises {
+export interface ExerciseDisplay extends Exercise {
   addedAt: number
 }
 
@@ -20,15 +20,17 @@ export type WorkoutExerciseWithSets = {
 export const WorkoutContext = createContext<{
   workoutExercises: WorkoutExerciseWithSets[];
   removeExercise: (exercise: ExerciseDisplay) => void;
-  setExerciseSets: (exercise: ExerciseDisplay, sets: DisplaySets[]) => void;
+  updateExerciseData: (exercise: ExerciseDisplay, sets: DisplaySets[]) => void;
   addExtraSetToExercise: (exercise: ExerciseDisplay) => void;
   popSetFromExercise: (exercise: ExerciseDisplay) => void;
+  updateSetDataForExercise: (exercise: ExerciseDisplay, set_num: number, type: "weight" | "reps", value: string) => void;
 }>({
   workoutExercises: [],
   removeExercise: () => { return },
-  setExerciseSets: () => { return},
+  updateExerciseData: () => { return},
   addExtraSetToExercise: () => { return },
-  popSetFromExercise: () => { return }
+  popSetFromExercise: () => { return },
+  updateSetDataForExercise: () => { return }
 });
 
 export const WorkoutDialog = ({
@@ -39,9 +41,15 @@ export const WorkoutDialog = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [workoutExercises, setWorkoutExercises] = useState<WorkoutExerciseWithSets[]>([])
 
-  // const logWorkout = api.workout.logWorkout
+  const logWorkout = api.user.logWorkout.useMutation({
+    onSuccess: () => {
+      console.log("It worked!!!!!")
+      clearExercises()
+      setDialogOpen(false)
+    }
+  })
 
-  const addExercise = (exercise: Exercises) => {
+  const addExercise = (exercise: Exercise) => {
     const newExercises = [
       ...workoutExercises, 
       { 
@@ -57,17 +65,44 @@ export const WorkoutDialog = ({
   }
 
   const onFinishWorkoutClicked = () => {
-    console.log("Its done!")
+    logWorkout.mutate(
+      workoutExercises
+    )
   }
 
   const removeExercise = (exercise: ExerciseDisplay) => {
     setWorkoutExercises(prev => prev.filter(ex => ex.exercise !== exercise));
   }
 
-  const setExerciseSets = (exercise: ExerciseDisplay, sets: DisplaySets[]) => {
+  const updateExerciseData = (exercise: ExerciseDisplay, sets: DisplaySets[]) => {
     setWorkoutExercises(prev => prev.map(ex => 
       ex.exercise === exercise ? { ...ex, sets } : ex
     ));
+  };
+
+  const updateSetDataForExercise = (exercise: ExerciseDisplay, set_num: number, type: "weight" | "reps", value: string) => {
+    const numberValue = parseInt(value)
+    console.log("numberValue", numberValue)
+
+    setWorkoutExercises(prev => prev.map(ex => { 
+      if (ex.exercise === exercise) {
+        return {
+          ...ex,
+          sets: ex.sets.map(set => {
+            if (set.set_num === set_num) {
+              return {
+                ...set,
+                weight: type === "weight" ? numberValue : set.weight,
+                reps: type === "reps" ? numberValue : set.reps,
+              }
+            } 
+            return set
+          })
+        }
+      }
+        
+      return ex
+    }));
   }
 
   const addExtraSetToExercise = (exercise: ExerciseDisplay) => {
@@ -103,9 +138,10 @@ export const WorkoutDialog = ({
         value={{
           workoutExercises,
           removeExercise,
-          setExerciseSets,
+          updateExerciseData,
           addExtraSetToExercise,
-          popSetFromExercise
+          popSetFromExercise,
+          updateSetDataForExercise
         }}   
       >
         <Dialog open={dialogOpen}>
@@ -118,7 +154,9 @@ export const WorkoutDialog = ({
                   Gain time
                 </div>
                 <ConfirmFinishWorkoutDialog onFinishWorkoutClicked={onFinishWorkoutClicked}>
-                  <Button className="bg-green-500 place-items-end">
+                  <Button 
+                    className="bg-green-500 place-items-end"
+                  >
                     Finish Workout
                   </Button>
                 </ConfirmFinishWorkoutDialog>
