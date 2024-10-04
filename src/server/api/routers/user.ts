@@ -67,7 +67,8 @@ export const userRouter = createTRPCRouter({
             updated_at: z.date(),
             user_id: z.string(),
             exercise_name: z.string(),
-            addedAt: z.number() 
+            addedAt: z.number(), 
+            exercise_type_id: z.string()
           }),
           sets: z.array(
             z.object({
@@ -103,6 +104,8 @@ export const userRouter = createTRPCRouter({
           }
         })
 
+        const exerciseTypes = await ctx.prisma.exerciseType.findMany()
+        
         for (const exer of input) {
           const exerciseLog = await ctx.prisma.exerciseLog.create({
             data: {
@@ -113,14 +116,35 @@ export const userRouter = createTRPCRouter({
             }
           })
 
+          const exerType = exerciseTypes.find(type => type.id === exer.exercise.exercise_type_id)
+          if (!exerType) {
+            console.log("No exercise type!")
+            return
+          }
+
           const definedSets = exer.sets.map((set) => {
-            if (set.weight && set.reps) {
-              return {
-                exercise_id: exer.exercise.id,
-                exerciseLog_id: exerciseLog.id,
-                set_num: set.set_num,
-                weight: set.weight,
-                reps: set.reps,
+            if (exerType.name === "normal_weighted") {
+              if (set.weight && set.reps) {
+                console.log('This should not happen')
+                return {
+                  exercise_id: exer.exercise.id,
+                  exerciseLog_id: exerciseLog.id,
+                  set_num: set.set_num,
+                  weight: set.weight,
+                  reps: set.reps,
+                }
+              }
+            }
+
+            if (exerType.name === "weighted_bodyweight") {
+              if (set.reps) {
+                return {
+                  exercise_id: exer.exercise.id,
+                  exerciseLog_id: exerciseLog.id,
+                  set_num: set.set_num,
+                  weight: set.weight,
+                  reps: set.reps,
+                }
               }
             }
           })

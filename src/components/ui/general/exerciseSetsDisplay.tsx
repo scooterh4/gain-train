@@ -6,21 +6,18 @@ import { Button } from "../button";
 import { CircleEllipsisIcon, Trash2Icon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../dropdown-menu";
 import { type ExerciseDisplay, WorkoutContext } from "./workoutDialog";
+import { getEmptySet, getPrevSetMessage } from "~/lib/utils";
 
-export type DisplaySets = {
+export type DisplaySet = {
   prev_set: string,
   set_num: number,
   weight: number | null,
   reps: number | null,
 }
 
-export const emptySet = (setNum: number) => {
-  return {
-    prev_set: "",
-    set_num: setNum,
-    weight: null,
-    reps: null
-  }
+export enum ExerciseTypes {
+  normal_weighted = '12asdf3=23=4-523-',
+  weighted_bodyweight = 'asjhfihni2134=30i2r'
 }
 
 export const ExerciseTableDisplay = ({
@@ -29,7 +26,7 @@ export const ExerciseTableDisplay = ({
   }: 
   {
     exercise: ExerciseDisplay;
-    sets: DisplaySets[];
+    sets: DisplaySet[];
   }) => {
   const prevSets = api.exercise.getPreviousSetsForExercise.useQuery({
     exerciseId: exercise.id
@@ -48,18 +45,19 @@ export const ExerciseTableDisplay = ({
   
     // Check if the sets are already initialized to avoid re-triggering the effect
     if (currentExer?.sets.length === 0 || prevSets !== undefined) {
-      let newSets: DisplaySets[] = [];
+      let newSets: DisplaySet[] = [];
   
       if (!prevSets) {
-        newSets = [ emptySet(1) ]
+        newSets = [ getEmptySet(1) ]
       } else {
-        
-        newSets = prevSets.map(set => ({
-          prev_set: `${set.weight} x ${set.reps}`,
-          set_num: set.set_num,
-          weight: null,
-          reps: null,
-        }));
+        newSets = prevSets.map((set) => (
+          {
+            prev_set: getPrevSetMessage(exercise.exercise_type_id, set.weight, set.reps),
+            set_num: set.set_num,
+            weight: null,
+            reps: null,
+          }
+        ));
       }
   
       updateExerciseData(exercise, newSets);
@@ -91,7 +89,7 @@ export const ExerciseTableDisplay = ({
         <TableRow>
           <TableHead className="w-[30px]">Set</TableHead>
           <TableHead>Previous display</TableHead>
-          <TableHead>Weight</TableHead>
+          <TableHead>{ exercise.exercise_type_id === ExerciseTypes.normal_weighted.valueOf() ? 'lbs' : '+ lbs'}</TableHead>
           <TableHead>Reps</TableHead>
         </TableRow>
       </TableHeader>

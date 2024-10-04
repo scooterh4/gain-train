@@ -3,10 +3,11 @@ import { Dialog, DialogContent } from "../dialog";
 import { Button } from "../button";
 import { X } from "lucide-react";
 import { ExercisesDialog } from "./exercisesDialog";
-import { type DisplaySets, emptySet, ExerciseTableDisplay } from "./exerciseSetsDisplay";
+import { type DisplaySet, ExerciseTableDisplay } from "./exerciseSetsDisplay";
 import { Table } from "../table";
 import { api } from "~/utils/api";
 import { type Exercise } from "@prisma/client";
+import { getEmptySet } from "~/lib/utils";
 
 export interface ExerciseDisplay extends Exercise {
   addedAt: number
@@ -14,13 +15,13 @@ export interface ExerciseDisplay extends Exercise {
 
 export type WorkoutExerciseWithSets = { 
   exercise: ExerciseDisplay, 
-  sets: DisplaySets[]
+  sets: DisplaySet[]
 }
 
 export const WorkoutContext = createContext<{
   workoutExercises: WorkoutExerciseWithSets[];
   removeExercise: (exercise: ExerciseDisplay) => void;
-  updateExerciseData: (exercise: ExerciseDisplay, sets: DisplaySets[]) => void;
+  updateExerciseData: (exercise: ExerciseDisplay, sets: DisplaySet[]) => void;
   addExtraSetToExercise: (exercise: ExerciseDisplay) => void;
   popSetFromExercise: (exercise: ExerciseDisplay) => void;
   updateSetDataForExercise: (exercise: ExerciseDisplay, set_num: number, type: "weight" | "reps", value: string) => void;
@@ -74,7 +75,7 @@ export const WorkoutDialog = ({
     setWorkoutExercises(prev => prev.filter(ex => ex.exercise !== exercise));
   }
 
-  const updateExerciseData = (exercise: ExerciseDisplay, sets: DisplaySets[]) => {
+  const updateExerciseData = (exercise: ExerciseDisplay, sets: DisplaySet[]) => {
     setWorkoutExercises(prev => prev.map(ex => 
       ex.exercise === exercise ? { ...ex, sets } : ex
     ));
@@ -108,7 +109,7 @@ export const WorkoutDialog = ({
   const addExtraSetToExercise = (exercise: ExerciseDisplay) => {
     setWorkoutExercises(prev => prev.map(ex => {
       if (ex.exercise === exercise) {
-        const newSet: DisplaySets = emptySet(ex.sets.length + 1);
+        const newSet: DisplaySet = getEmptySet(ex.sets.length + 1);
         return { ...ex, sets: [...ex.sets, newSet] };
       }
       return ex;

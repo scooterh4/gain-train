@@ -1,6 +1,6 @@
 import { type ExerciseType, type AppUser } from "@prisma/client";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const exerciseRouter = createTRPCRouter({
   createExercise: protectedProcedure
