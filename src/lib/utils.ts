@@ -28,3 +28,15 @@ export function getPrevSetMessage (exercise_type_id: string, weight: number | nu
       return ''
   }
 }
+
+export const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric'
+});
+
+export const timeFormatter = new Intl.DateTimeFormat('en-US', {
+  hour: 'numeric',
+  minute: 'numeric',
+  hour12: true
+});

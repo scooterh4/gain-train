@@ -138,8 +138,10 @@ export const userRouter = createTRPCRouter({
                 }
               }
             }
+
+            return null
           })
-          .filter(set => set !== undefined)
+          .filter(set => !!set)
 
           // adjust set numbers
           const sets = definedSets.map((set, index) => {
@@ -157,4 +159,34 @@ export const userRouter = createTRPCRouter({
         console.log("Error processing request", error);
       }
   }),
+
+  getUserWorkoutHistory: protectedProcedure
+    .query(async ({ ctx }) => {
+      const user = await ctx.prisma.appUser.findFirst({
+        where: {
+          auth_uid: ctx.authUser?.id
+        }
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      return await ctx.prisma.workoutLog.findMany({
+        where: {
+          user_id: user.id
+        },
+        include: {
+          ExerciseLog: {
+            include: {
+              Exercise: true,
+              SetLog: true
+            }
+          },
+        },
+        orderBy: {
+          created_at: 'desc'
+        }
+      });
+    })
 });
