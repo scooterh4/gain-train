@@ -118,10 +118,10 @@ model SetLog {
 model WorkoutLog {
   id               String        @id @default(cuid())
   created_at       DateTime      @default(now())
-  updated_at       DateTime      @updatedAt
+  started_at       DateTime
+  ended_at         DateTime      @default(now())
   user_id          String        
   workout_name     String
-  duration_seconds Int
   notes            String?
   AppUser          AppUser       @relation(fields: [user_id], references: [id])
   ExerciseLog      ExerciseLog[]
