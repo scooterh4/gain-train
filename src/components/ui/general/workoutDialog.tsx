@@ -34,8 +34,6 @@ export const WorkoutContext = createContext<{
   updateSetDataForExercise: () => { return }
 });
 
-// TODO fix this to workout with started_at and ended_at columns
-
 export const WorkoutDialog = ({
     started_at,
     children,

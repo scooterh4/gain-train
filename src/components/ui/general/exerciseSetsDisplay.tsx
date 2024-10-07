@@ -47,7 +47,7 @@ export const ExerciseTableDisplay = ({
     if (currentExer?.sets.length === 0 || prevSets !== undefined) {
       let newSets: DisplaySet[] = [];
   
-      if (!prevSets) {
+      if (!prevSets || prevSets.length === 0) {
         newSets = [ getEmptySet(1) ]
       } else {
         newSets = prevSets.map((set) => (

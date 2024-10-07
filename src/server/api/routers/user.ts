@@ -82,7 +82,6 @@ export const userRouter = createTRPCRouter({
         return
       }
 
-      // TODO fix this to work with started_at and ended_at columns
       try {
         const workoutLog = await ctx.prisma.workoutLog.create({
           data: {
@@ -134,7 +133,7 @@ export const userRouter = createTRPCRouter({
                   exercise_id: exer.exercise.id,
                   exerciseLog_id: exerciseLog.id,
                   set_num: set.set_num,
-                  weight: set.weight,
+                  weight: set.weight ? set.weight : null,
                   reps: set.reps,
                 }
               }
