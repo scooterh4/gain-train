@@ -1,119 +1,130 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider     = "postgresql"
-    url          = env("DATABASE_URL")
-    directUrl    = env("DIRECT_URL")
-    relationMode = "prisma"
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  directUrl    = env("DIRECT_URL")
+  relationMode = "prisma"
 }
 
-// Data models in alphabetical order
 model AlltimePersonalBests {
-    id          String    @id @default(cuid())
-    created_at  DateTime  @default(now())
-    updated_at  DateTime  @updatedAt
-    user_id     String    @unique
-    AppUser     AppUser   @relation(fields: [user_id], references: [id])
-    exercise_id String    @unique
-    Exercise    Exercises @relation(fields: [exercise_id], references: [id])
-    setLog_id   String    @unique
-    SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
+  id          String    @id @default(cuid())
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  user_id     String    
+  exercise_id String    
+  setLog_id   String    @unique
+  AppUser     AppUser   @relation(fields: [user_id], references: [id])
+  Exercise    Exercise @relation(fields: [exercise_id], references: [id])
+  SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
 
-    @@index([user_id])
+  @@index([user_id])
+  @@index([exercise_id])
 }
 
 model AppUser {
-    id         String   @id @default(cuid())
-    name       String
-    email      String
-    auth_uid   String
-    created_at DateTime @default(now())
-
-    Exercises            Exercises[]
-    WorkoutLog           WorkoutLog[]
-    ExerciseLog          ExerciseLog[]
-    AlltimePersonalBests AlltimePersonalBests[]
-    DailyPersonalBests   DailyPersonalBests[]
+  id                   String                 @id @default(cuid())
+  name                 String
+  email                String
+  auth_uid             String
+  created_at           DateTime               @default(now())
+  Exercises            Exercise[]
+  WorkoutLog           WorkoutLog[]
+  ExerciseLog          ExerciseLog[]
+  AlltimePersonalBests AlltimePersonalBests[]
+  DailyPersonalBests   DailyPersonalBests[]
 }
 
 model DailyPersonalBests {
-    id          String    @id @default(cuid())
-    created_at  DateTime  @default(now())
-    updated_at  DateTime  @updatedAt
-    user_id     String    @unique
-    AppUser     AppUser   @relation(fields: [user_id], references: [id])
-    exercise_id String    @unique
-    Exercise    Exercises @relation(fields: [exercise_id], references: [id])
-    setLog_id   String    @unique
-    SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
+  id          String    @id @default(cuid())
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  user_id     String    
+  exercise_id String    
+  setLog_id   String    @unique
+  AppUser     AppUser   @relation(fields: [user_id], references: [id])
+  Exercise    Exercise @relation(fields: [exercise_id], references: [id])
+  SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
 
-    @@index([user_id])
+  @@index([user_id])
+  @@index([exercise_id])
 }
 
-model Exercises {
-    id            String   @id @default(cuid())
-    created_at    DateTime @default(now())
-    updated_at    DateTime @updatedAt
-    AppUser       AppUser  @relation(fields: [user_id], references: [id])
-    user_id       String  
-    exercise_name String
+model Exercise {
+  id                   String                 @id @default(cuid())
+  created_at           DateTime               @default(now())
+  updated_at           DateTime               @updatedAt
+  user_id              String
+  exercise_name        String
+  exercise_type_id     String                 // Foreign key to the ExerciseType table
+  AppUser              AppUser                @relation(fields: [user_id], references: [id])
+  ExerciseType         ExerciseType           @relation(fields: [exercise_type_id], references: [id])
+  ExerciseLog          ExerciseLog[]
+  SetLog               SetLog[]
+  AlltimePersonalBests AlltimePersonalBests[]
+  DailyPersonalBests   DailyPersonalBests[]
 
-    ExerciseLog          ExerciseLog[]
-    SetLog               SetLog[]
-    AlltimePersonalBests AlltimePersonalBests[]
-    DailyPersonalBests   DailyPersonalBests[]
-
-    @@index([user_id])
+  @@index([user_id])
+  @@index([exercise_type_id])
 }
 
 model ExerciseLog {
-    id            String     @id @default(cuid())
-    created_at    DateTime   @default(now())
-    updated_at    DateTime   @updatedAt
-    AppUser       AppUser    @relation(fields: [user_id], references: [id])
-    user_id       String     @unique
-    WorkoutLog    WorkoutLog @relation(fields: [workoutLog_id], references: [id])
-    workoutLog_id String     @unique
-    Exercise      Exercises  @relation(fields: [exercise_id], references: [id])
-    exercise_id   String     @unique
-    notes         String?
+  id            String     @id @default(cuid())
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  user_id       String     
+  workoutLog_id String     
+  exercise_id   String
+  notes         String?
+  AppUser       AppUser    @relation(fields: [user_id], references: [id])
+  WorkoutLog    WorkoutLog @relation(fields: [workoutLog_id], references: [id])
+  Exercise      Exercise  @relation(fields: [exercise_id], references: [id])
+  SetLog        SetLog[]
 
-    SetLog SetLog[]
+  @@index([user_id])
+  @@index([exercise_id])
+  @@index([workoutLog_id])
+}
 
-    @@index([user_id])
+model ExerciseType {
+  id              String     @id @default(cuid())
+  name            String     // e.g., "normal_weighted" or "weighted_bodyweight"
+  requires_weight Boolean    // Indicates if weight is required
+  requires_reps   Boolean    // Indicates if reps are required
+
+  Exercise       Exercise[]
 }
 
 model SetLog {
-    id             String      @id @default(cuid())
-    created_at     DateTime    @default(now())
-    updated_at     DateTime    @updatedAt
-    Exercise       Exercises   @relation(fields: [exercise_id], references: [id])
-    exercise_id    String      @unique
-    ExerciseLog    ExerciseLog @relation(fields: [exerciseLog_id], references: [id])
-    exerciseLog_id String      @unique
-    set_num        Int
-    weight         Int
-    reps           Int
+  id                   String                 @id @default(cuid())
+  created_at           DateTime               @default(now())
+  updated_at           DateTime               @updatedAt
+  exercise_id          String                 
+  exerciseLog_id       String                 
+  set_num              Int
+  weight               Int?                   // Optional weight for bodyweight exercises
+  reps                 Int
+  Exercise             Exercise               @relation(fields: [exercise_id], references: [id])
+  ExerciseLog          ExerciseLog            @relation(fields: [exerciseLog_id], references: [id])
+  AlltimePersonalBests AlltimePersonalBests?
+  DailyPersonalBests   DailyPersonalBests?
 
-    AlltimePersonalBests AlltimePersonalBests[]
-    DailyPersonalBests   DailyPersonalBests[]
-
-    @@index([exercise_id])
+  @@index([exercise_id])
+  @@index([exerciseLog_id])
 }
 
 model WorkoutLog {
-    id               String   @id @default(cuid())
-    created_at       DateTime @default(now())
-    updated_at       DateTime @updatedAt
-    AppUser          AppUser  @relation(fields: [user_id], references: [id])
-    user_id          String   @unique
-    workout_name     String
-    duration_seconds Int
-    notes            String?
+  id               String        @id @default(cuid())
+  created_at       DateTime      @default(now())
+  started_at       DateTime
+  ended_at         DateTime      @default(now())
+  user_id          String        
+  workout_name     String
+  notes            String?
+  AppUser          AppUser       @relation(fields: [user_id], references: [id])
+  ExerciseLog      ExerciseLog[]
 
-    ExerciseLog ExerciseLog[]
-
-    @@index([user_id])
+  @@index([user_id])
 }
