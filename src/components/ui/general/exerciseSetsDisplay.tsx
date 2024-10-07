@@ -13,6 +13,7 @@ export type DisplaySet = {
   set_num: number,
   weight: number | null,
   reps: number | null,
+  error: boolean
 }
 
 export enum ExerciseTypes {
@@ -56,6 +57,7 @@ export const ExerciseTableDisplay = ({
             set_num: set.set_num,
             weight: null,
             reps: null,
+            error: false
           }
         ));
       }
@@ -95,7 +97,7 @@ export const ExerciseTableDisplay = ({
       </TableHeader>
       <TableBody>
         {sets.map((set => 
-          <TableRow key={set.set_num}>
+          <TableRow key={set.set_num} className={set.error ? "bg-red-500" : ""}>
             <TableCell className="font-medium">{set.set_num}</TableCell>
             <TableCell>{set.prev_set}</TableCell>
             <TableCell>

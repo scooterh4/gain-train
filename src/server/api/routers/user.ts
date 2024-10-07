@@ -115,7 +115,7 @@ export const userRouter = createTRPCRouter({
 
           // TODO debug this because it still doesn't work for weighted_bodyweight exercises
           const definedSets = exer.sets.map((set) => {
-            if (exerType.name === "normal_weighted") {
+            if (exerType.name === "Normal weighted") {
               if (set.weight && set.reps) {
                 return {
                   exercise_id: exer.exercise.id,
@@ -127,7 +127,7 @@ export const userRouter = createTRPCRouter({
               }
             }
 
-            if (exerType.name === "weighted_bodyweight") {
+            if (exerType.name === "Weighted bodyweight") {
               if (set.reps) {
                 return {
                   exercise_id: exer.exercise.id,

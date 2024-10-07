@@ -11,7 +11,8 @@ export const getEmptySet = (setNum: number) => {
     prev_set: "",
     set_num: setNum,
     weight: null,
-    reps: null
+    reps: null,
+    error: false
   }
 }
 

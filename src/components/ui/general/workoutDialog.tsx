@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from "../dialog";
 import { Button } from "../button";
 import { X } from "lucide-react";
 import { ExercisesDialog } from "./exercisesDialog";
-import { type DisplaySet, ExerciseTableDisplay } from "./exerciseSetsDisplay";
+import { type DisplaySet, ExerciseTableDisplay, ExerciseTypes } from "./exerciseSetsDisplay";
 import { Table } from "../table";
 import { api } from "~/utils/api";
 import { type Exercise } from "@prisma/client";
@@ -65,6 +65,27 @@ export const WorkoutDialog = ({
 
   const clearExercises = () => {
     setWorkoutExercises([])
+  }
+
+  const updateSetErrors = () => {
+    const stateWithErrors = workoutExercises.map(exer => {
+      const exerSets = exer.sets.map(set => {
+        if (exer.exercise.exercise_type_id === ExerciseTypes.normal_weighted.valueOf()) {
+          set.error = (!set.reps || !set.weight)
+        }
+        else if (exer.exercise.exercise_type_id === ExerciseTypes.weighted_bodyweight.valueOf()) {
+          set.error = (!set.reps)
+        }
+        return set  
+      })
+
+      return { 
+        exercise: exer.exercise, 
+        sets: exerSets
+      }
+    })
+
+    setWorkoutExercises(stateWithErrors)
   }
 
   const onFinishWorkoutClicked = () => {
@@ -165,6 +186,7 @@ export const WorkoutDialog = ({
                 <ConfirmFinishWorkoutDialog onFinishWorkoutClicked={onFinishWorkoutClicked}>
                   <Button 
                     className="bg-green-500 place-items-end"
+                    onClick={() => updateSetErrors()}
                   >
                     Finish Workout
                   </Button>
@@ -230,19 +252,22 @@ const ConfirmFinishWorkoutDialog = ({
           <div className="relative overflow-y-auto overflow-x-hidden p-6 ">
             <div className="flex flex-row mb-4 place-content-between rounded-2xl bg-blue-800 p-4 text-black">
               <div className="mb-2 text-xl text-white font-medium">
-                R u sure ur done?
+                Are you sure?
               </div>
             </div>
+            <div className="mb-2 text-lg text-black font-medium">
+                Any empty sets will be discarded (highlighted in red)
+              </div>
             <Button className="bg-green-600 text-white" onClick={() => {
               setConfirmDialogOpen(false)
               onFinishWorkoutClicked()
             }}>
-              Yes
+              Finish
             </Button>
             <Button className="bg-red-600 text-white" onClick={() => {
               setConfirmDialogOpen(false)}}
             >
-              No
+              Go back
             </Button>
           </div>
         </DialogContent>
