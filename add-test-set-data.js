@@ -37,7 +37,8 @@ async function testConnection() {
           connect: user
         },
         workout_name: "First test workout",
-        duration_seconds: 60 * 60 * 2,
+        started_at: new Date(Date.now() - 60*60*2).toISOString(),
+        ended_at: new Date(Date.now()).toISOString()
       }
     })
 

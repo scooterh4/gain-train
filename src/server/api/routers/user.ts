@@ -36,19 +36,6 @@ export const userRouter = createTRPCRouter({
       return newUser
     }),
 
-  // create: publicProcedure
-  //   .input(z.object({ name: z.string().min(1), email: z.string().email() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     const user: User = await ctx.prisma.user.create({
-  //       data: {
-  //         name: input.name,
-  //         email: input.email,
-  //       },
-  //     });
-      
-  //     return user
-  //   }),
-
   getLatest: publicProcedure.query<AppUser[] | null>(async ({ ctx }) => {
     const users: AppUser[] = await ctx.prisma.appUser.findMany({
       orderBy: { created_at: "desc" },
@@ -59,27 +46,30 @@ export const userRouter = createTRPCRouter({
 
   logWorkout: protectedProcedure
     .input(
-      z.array(
-        z.object({
-          exercise: z.object({ 
-            id: z.string(),
-            created_at: z.date(),
-            updated_at: z.date(),
-            user_id: z.string(),
-            exercise_name: z.string(),
-            addedAt: z.number(), 
-            exercise_type_id: z.string()
-          }),
-          sets: z.array(
-            z.object({
-              prev_set: z.string(),
-              set_num: z.number(),
-              weight: z.number().nullable(),
-              reps: z.number().nullable()
-            })
-          )
-        })
-      )
+      z.object({
+        started_at: z.number(),
+        workout: z.array(
+          z.object({
+            exercise: z.object({ 
+              id: z.string(),
+              created_at: z.date(),
+              updated_at: z.date(),
+              user_id: z.string(),
+              exercise_name: z.string(),
+              addedAt: z.number(), 
+              exercise_type_id: z.string()
+            }),
+            sets: z.array(
+              z.object({
+                prev_set: z.string(),
+                set_num: z.number(),
+                weight: z.number().nullable(),
+                reps: z.number().nullable()
+              })
+            )
+          })
+        ),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const user: AppUser = await ctx.prisma.appUser.findFirstOrThrow({
@@ -92,21 +82,23 @@ export const userRouter = createTRPCRouter({
         return
       }
 
+      // TODO fix this to work with started_at and ended_at columns
       try {
         const workoutLog = await ctx.prisma.workoutLog.create({
           data: {
             AppUser: {
               connect: user
             },
+            started_at: new Date(input.started_at).toISOString(),
+            ended_at: new Date(Date.now()).toISOString(),
             workout_name: `Test workout ${Math.random() * 1000}`,
-            duration_seconds: 60 * 60 * 2,
             notes: "Nothing new" 
           }
         })
 
         const exerciseTypes = await ctx.prisma.exerciseType.findMany()
         
-        for (const exer of input) {
+        for (const exer of input.workout) {
           const exerciseLog = await ctx.prisma.exerciseLog.create({
             data: {
               user_id: user.id,     
@@ -122,10 +114,10 @@ export const userRouter = createTRPCRouter({
             return
           }
 
+          // TODO debug this because it still doesn't work for weighted_bodyweight exercises
           const definedSets = exer.sets.map((set) => {
             if (exerType.name === "normal_weighted") {
               if (set.weight && set.reps) {
-                console.log('This should not happen')
                 return {
                   exercise_id: exer.exercise.id,
                   exerciseLog_id: exerciseLog.id,

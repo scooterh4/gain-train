@@ -4,18 +4,18 @@ import { Button } from "../button";
 import { X } from "lucide-react";
 import { AddNewExerciseDialog } from "./addNewExerciseDialog";
 import { api } from "~/utils/api";
-import { type Exercises } from "@prisma/client";
+import { type Exercise } from "@prisma/client";
 
 export const ExercisesDialog = ({
   addExercise,
   children,
 }: {
-  addExercise: (exercise: Exercises) => void;
+  addExercise: (exercise: Exercise) => void;
   children: React.ReactNode;
 }): JSX.Element => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const userExercises = api.exercise.getUserExercises.useQuery().data
-  function onExerciseClicked(exercise: Exercises) {
+  function onExerciseClicked(exercise: Exercise) {
     addExercise(exercise)
     setDialogOpen(false)
   }

@@ -16,8 +16,8 @@ export type DisplaySet = {
 }
 
 export enum ExerciseTypes {
-  normal_weighted = '12asdf3=23=4-523-',
-  weighted_bodyweight = 'asjhfihni2134=30i2r'
+  normal_weighted = '123f879wfe=fw9ew87',
+  weighted_bodyweight = 'nasdklfsda9f7348hu'
 }
 
 export const ExerciseTableDisplay = ({

@@ -18,7 +18,7 @@ export const getEmptySet = (setNum: number) => {
 export function getPrevSetMessage (exercise_type_id: string, weight: number | null, reps: number) {
   switch (exercise_type_id) {
     case ExerciseTypes.normal_weighted.valueOf():
-      return `${weight}lb x ${reps}`
+      return `${weight} lb x ${reps}`
     
     case ExerciseTypes.weighted_bodyweight.valueOf():
       return weight ? `+${weight} lb x ${reps}` : `${reps} reps`

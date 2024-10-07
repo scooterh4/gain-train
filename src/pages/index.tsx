@@ -1,9 +1,16 @@
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { WorkoutDialog } from "~/components/ui/general/workoutDialog";
 import { api } from "~/utils/api";
 
 export default function Home() {
   const user = api.user.helloUser.useQuery().data
+  const [ workoutStartedAt, setWorkoutStartedAt ] = useState<number | null>(null)
+
+  const startWorkout = () => {
+    console.log('Workout start reset')
+    setWorkoutStartedAt(Date.now())
+  }
 
   return (
     <>
@@ -18,8 +25,8 @@ export default function Home() {
             Quick start
           </h1>
           <div>
-          <WorkoutDialog>
-            <Button className="w-full">
+          <WorkoutDialog started_at={workoutStartedAt}>
+            <Button className="w-full" onClick={startWorkout}>
               Start new workout
             </Button>
           </WorkoutDialog>

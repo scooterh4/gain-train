@@ -34,14 +34,18 @@ export const WorkoutContext = createContext<{
   updateSetDataForExercise: () => { return }
 });
 
+// TODO fix this to workout with started_at and ended_at columns
+
 export const WorkoutDialog = ({
+    started_at,
     children,
   }: {
+    started_at: number | null,
     children: React.ReactNode;
   }): JSX.Element => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [workoutExercises, setWorkoutExercises] = useState<WorkoutExerciseWithSets[]>([])
-
+  
   const logWorkout = api.user.logWorkout.useMutation({
     onSuccess: () => {
       console.log("It worked!!!!!")
@@ -66,9 +70,15 @@ export const WorkoutDialog = ({
   }
 
   const onFinishWorkoutClicked = () => {
-    logWorkout.mutate(
-      workoutExercises
-    )
+    if (!started_at) {
+      console.log("No started_at value for workoutDialog")
+      return
+    }
+
+    logWorkout.mutate({
+      started_at: started_at,
+      workout: workoutExercises,
+    })
   }
 
   const removeExercise = (exercise: ExerciseDisplay) => {
