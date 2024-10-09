@@ -87,26 +87,6 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 });
 
 /**
- * Create a server-side caller.
- *
- * @see https://trpc.io/docs/server/server-side-calls
- */
-export const createCallerFactory = t.createCallerFactory;
-
-// check if the user is signed in, otherwise through a UNAUTHORIZED CODE
-const isAuthed = t.middleware(({ next, ctx }) => {
-  if (!ctx.authUser?.id) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-
-  return next({
-    ctx: {
-      ...ctx,
-      auth: ctx.authUser,
-    },
-  });
-});
-/**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
  *
  * These are the pieces you use to build your tRPC API. You should import these a lot in the
@@ -120,27 +100,17 @@ const isAuthed = t.middleware(({ next, ctx }) => {
  */
 export const createTRPCRouter = t.router;
 
-/**
- * Middleware for timing procedure execution and adding an articifial delay in development.
- *
- * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
- * network latency that would occur in production but not in local development.
- */
-const timingMiddleware = t.middleware(async ({ next, path }) => {
-  const start = Date.now();
-
-  if (t._config.isDev) {
-    // // artificial delay in dev
-    // const waitMs = Math.floor(Math.random() * 400) + 100;
-    // await new Promise((resolve) => setTimeout(resolve, waitMs));
+/** Reusable middleware that enforces users are logged in before running the procedure. */
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.authUser?.id) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
   }
-
-  const result = await next();
-
-  const end = Date.now();
-  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
-
-  return result;
+  return next({
+    ctx: {
+      // infers the `user` as non-nullable
+      authUser: ctx.authUser,
+    },
+  });
 });
 
 /**
@@ -150,5 +120,5 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure.use(timingMiddleware);
-export const protectedProcedure = t.procedure.use(isAuthed);
+export const publicProcedure = t.procedure;
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
