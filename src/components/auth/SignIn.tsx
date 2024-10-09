@@ -2,6 +2,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useToast } from "~/hooks/use-toast";
 import { Toaster } from "../ui/toaster";
 import { Button } from "../ui/button";
+import { getBaseUrl } from "~/utils/api";
 
 export function SignIn({ pageTitle }: { pageTitle: string }) {
   const supabase = useSupabaseClient();
@@ -14,7 +15,7 @@ export function SignIn({ pageTitle }: { pageTitle: string }) {
     const { error, data } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin + "/api/auth/callback",
+        redirectTo: getBaseUrl() + "/api/auth/callback",
       },
     });
     if (error) {
