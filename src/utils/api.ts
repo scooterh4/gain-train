@@ -12,10 +12,25 @@ import superjson from "superjson";
 import { type AppRouter } from "~/server/api/root";
 
 const getBaseUrl = () => {
+  console.log('window exists', typeof window !== "undefined")
   if (typeof window !== "undefined") return ""; // browser should use relative url
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+  console.log('NEXT_PUBLIC_VERCEL_URL exists', !!process.env.NEXT_PUBLIC_VERCEL_URL)
+  console.log('VERCEL_URL exists', !!process.env.VERCEL_URL)
+  if (process.env.NEXT_PUBLIC_VERCEL_URL) return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`; // SSR should use vercel url
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
+
+// export const getBaseUrl = () => {
+//   let url =
+//     process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
+//     process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+//     'http://localhost:3000/'
+//   // Make sure to include `https://` when not localhost.
+//   url = url.startsWith('http') ? url : `https://${url}`
+//   // Make sure to include a trailing `/`.
+//   url = url.endsWith('/') ? url : `${url}/`
+//   return url
+// }
 
 /** A set of type-safe react-query hooks for your tRPC API. */
 export const api = createTRPCNext<AppRouter>({
