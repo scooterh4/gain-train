@@ -12,10 +12,7 @@ import superjson from "superjson";
 import { type AppRouter } from "~/server/api/root";
 
 const getBaseUrl = () => {
-  console.log('window exists', typeof window !== "undefined")
   if (typeof window !== "undefined") return ""; // browser should use relative url
-  console.log('NEXT_PUBLIC_VERCEL_URL exists', !!process.env.NEXT_PUBLIC_VERCEL_URL)
-  console.log('VERCEL_URL exists', !!process.env.VERCEL_URL)
   if (process.env.NEXT_PUBLIC_VERCEL_URL) return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`; // SSR should use vercel url
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
