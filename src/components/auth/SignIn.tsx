@@ -11,17 +11,20 @@ export function SignIn({ pageTitle }: { pageTitle: string }) {
     toast({
       title: window.location.origin,
     });
+    try {
     const { error, data } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin + "/api/auth/callback",
+        redirectTo: (window.location.origin.includes('localhost') ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL) + "/api/auth/callback",
       },
     });
-    if (error) {
+      if (error) throw error;
+    } catch (error) {
+      console.error("Google sign-in error:", error);
       toast({
         variant: "destructive",
-        title: "Something went wrong",
-        description: "Error with auth" + error.message,
+        title: "Authentication Error",
+        description: `An unexpected error occurred. See console.`,
       });
     }
   };
