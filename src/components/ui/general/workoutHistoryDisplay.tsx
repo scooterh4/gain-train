@@ -1,21 +1,7 @@
-import { type Exercise, type SetLog } from "@prisma/client"
 import { dateFormatter, timeFormatter } from "~/lib/utils";
+import { type WorkoutDisplayType } from "~/pages/history";
 
-export interface IWorkoutDisplay {
-  ExerciseLog: {
-    Exercise: Exercise,
-    SetLog: SetLog[]
-  } [],
-  id: string,
-  created_at: Date,
-  started_at: Date,      
-  ended_at: Date,
-  user_id: string,        
-  workout_name: string,
-  notes: string | null,
-}
-
-export const WorkoutDisplay = ( workout: IWorkoutDisplay) => {
+export const WorkoutDisplay = ({ workout } : {workout: WorkoutDisplayType }) => {
   const formattedDate = dateFormatter.format(workout.started_at);
   const formattedStartTime = timeFormatter.format(workout.started_at).toLowerCase();
   const durationMin = ((workout.ended_at.getTime() - workout.started_at.getTime()) / 1000) / 60
