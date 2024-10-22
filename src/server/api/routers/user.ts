@@ -1,5 +1,6 @@
 import { type AppUser } from "@prisma/client";
 import { z } from "zod";
+import { WorkoutDisplayType } from "~/pages/history";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
 export const userRouter = createTRPCRouter({
@@ -138,8 +139,10 @@ export const userRouter = createTRPCRouter({
                 }
               }
             }
+
+            return null
           })
-          .filter(set => set !== undefined)
+          .filter(set => !!set)
 
           // adjust set numbers
           const sets = definedSets.map((set, index) => {
@@ -157,4 +160,85 @@ export const userRouter = createTRPCRouter({
         console.log("Error processing request", error);
       }
   }),
-});
+
+  getUserWorkoutHistory: protectedProcedure
+    .query(async ({ ctx }) => {
+      const user = await ctx.prisma.appUser.findFirst({
+        where: {
+          auth_uid: ctx.authUser?.id
+        }
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      return await ctx.prisma.workoutLog.findMany({
+        where: {
+          user_id: user.id
+        },
+        include: {
+          ExerciseLog: {
+            include: {
+              Exercise: true,
+              SetLog: true
+            }
+          },
+        },
+        orderBy: {
+          created_at: 'desc'
+        }
+      });
+    }),
+
+    getUserWorkouts: protectedProcedure
+    .input(
+      z.object({ 
+        limit: z.number(),
+        cursor: z.string().nullish(),
+        skip: z.number().optional(),
+      }))
+    .query(async ({ ctx, input }) => {
+      const { limit, cursor, skip } = input
+      const user = await ctx.prisma.appUser.findFirst({
+        where: {
+          auth_uid: ctx.authUser?.id
+        }
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      const workouts = await ctx.prisma.workoutLog.findMany({
+        where: {
+          user_id: user.id
+        },
+        include: {
+          ExerciseLog: {
+            include: {
+              Exercise: true,
+              SetLog: true
+            }
+          },
+        },
+        orderBy: {
+          created_at: 'desc'
+        },
+        take: limit + 1,
+        skip: skip,
+        cursor: cursor ? { id: cursor } : undefined
+      });
+
+      let nextCursor : typeof cursor | undefined = undefined
+      if (workouts.length > limit) {
+        const nextWorkout = workouts.pop()
+        nextCursor = nextWorkout?.id
+      }
+
+      return { 
+        workouts: [...workouts] as WorkoutDisplayType[] | undefined | null, 
+        cursor: nextCursor
+      }
+    }),
+}) 
