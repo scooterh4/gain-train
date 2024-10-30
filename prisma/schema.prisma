@@ -20,6 +20,7 @@ model AlltimePersonalBests {
   Exercise    Exercise @relation(fields: [exercise_id], references: [id])
   SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
 
+  @@unique([user_id, exercise_id])
   @@index([user_id])
   @@index([exercise_id])
 }
