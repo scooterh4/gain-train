@@ -1,7 +1,7 @@
-import { SetLog } from "@prisma/client"
+import { type SetLog } from "@prisma/client"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { ExerciseTypes } from "~/components/ui/general/exerciseSetsDisplay"
+import { ExerciseTypes } from "../components/ui/general/exerciseSetsDisplay"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

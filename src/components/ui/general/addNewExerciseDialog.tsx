@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from "../dialog";
 import { Button } from "../button";
 import { X } from "lucide-react";
 import { Input } from "../input";
-import { api } from "~/utils/api";
+import { api } from "../../../utils/api";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { ExerciseType } from "@prisma/client";
 

@@ -5,9 +5,9 @@ import { X } from "lucide-react";
 import { ExercisesDialog } from "./exercisesDialog";
 import { type DisplaySet, ExerciseTableDisplay, ExerciseTypes } from "./exerciseSetsDisplay";
 import { Table } from "../table";
-import { api } from "~/utils/api";
+import { api } from "../../../utils/api";
 import { type Exercise } from "@prisma/client";
-import { getEmptySet } from "~/lib/utils";
+import { getEmptySet } from "../../../lib/utils";
 
 export interface ExerciseDisplay extends Exercise {
   addedAt: number
