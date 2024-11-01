@@ -1,3 +1,4 @@
+import { SetLog } from "@prisma/client"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { ExerciseTypes } from "~/components/ui/general/exerciseSetsDisplay"
@@ -40,3 +41,14 @@ export const timeFormatter = new Intl.DateTimeFormat('en-US', {
   minute: 'numeric',
   hour12: true
 });
+
+export function isBetterSet(newSet: SetLog, currentBest: SetLog | undefined): boolean {
+  // returns true if the newSet is 'better' than the currentBest
+  // better means the new set was more weight, OR the new set had more reps for the same weight
+  return (
+    (!currentBest) 
+    || (!!newSet.weight && !currentBest.weight) 
+    || (!!newSet.weight && !!currentBest.weight && newSet.weight > currentBest.weight)
+    || (newSet.weight === currentBest.weight && newSet.reps > currentBest.reps)
+  );
+}

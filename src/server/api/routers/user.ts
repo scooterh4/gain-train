@@ -1,6 +1,7 @@
 import { type AppUser } from "@prisma/client";
 import { z } from "zod";
-import { WorkoutDisplayType } from "~/pages/history";
+import { isBetterSet } from "~/lib/utils";
+import { type WorkoutDisplayType } from "~/pages/history";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
 export const userRouter = createTRPCRouter({
@@ -145,7 +146,7 @@ export const userRouter = createTRPCRouter({
           .filter(set => !!set)
 
           // adjust set numbers
-          const sets = definedSets.map((set, index) => {
+          const newSets = definedSets.map((set, index) => {
             return {
               ...set,
               set_num: index + 1 
@@ -153,13 +154,289 @@ export const userRouter = createTRPCRouter({
           }) 
 
           await ctx.prisma.setLog.createMany({
-            data: sets
+            data: newSets
           })
+          
+          const sets = await ctx.prisma.setLog.findMany({
+            where: {
+              exercise_id: exer.exercise.id
+            }
+          })
+  
+          let newDailyBest = null;
+          let newAlltimeBest = null;
+        
+          for (const set of sets) {
+            if (!newAlltimeBest) {
+              newAlltimeBest = set;
+            } else if (isBetterSet(set, newAlltimeBest)) {
+              newAlltimeBest = set;
+            }
+        
+            if (!newDailyBest) {
+              newDailyBest = set;
+            } else if (isBetterSet(set, newDailyBest)) {
+              newDailyBest = set;
+            }
+          }
+        
+          const alltimeBest = await ctx.prisma.alltimePersonalBests.findFirst({
+            where: {
+              AppUser: {
+                auth_uid: ctx.authUser.id
+              },
+              exercise_id: exer.exercise.id
+            },
+            include: {
+              SetLog: true
+            }
+          })
+
+          // Get today
+          const today = new Date()
+          const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+          const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+  
+          const dailyBest = await ctx.prisma.dailyPersonalBests.findFirst({
+            where: {
+              AppUser: {
+                auth_uid: ctx.authUser.id
+              },
+              exercise_id: exer.exercise.id, 
+              created_at: {
+                gte: startOfDay,
+                lte: endOfDay
+              }
+            },
+            include: {
+              SetLog: true
+            }
+          })
+
+          // Update the database with newAlltimeBest if they've changed
+          if (!!newAlltimeBest && isBetterSet(newAlltimeBest, alltimeBest?.SetLog)) {
+            if (alltimeBest) {
+              // Update
+              await ctx.prisma.alltimePersonalBests.update({
+                where: { id: alltimeBest.id },
+                data: { setLog_id: newAlltimeBest.id }
+              });
+            } else {
+              // Create
+              await ctx.prisma.alltimePersonalBests.create({
+                data: {
+                  user_id: user.id,
+                  exercise_id: newAlltimeBest.exercise_id,
+                  setLog_id: newAlltimeBest.id 
+                }
+              });
+            }
+          }
+  
+          // Update the database with newDailyBest if they've changed
+          // TODO make this work
+          if (!!newDailyBest && isBetterSet(newDailyBest, dailyBest?.SetLog)) {
+            if (dailyBest) {
+              // Update
+              await ctx.prisma.dailyPersonalBests.update({
+                where: { id: dailyBest.id },
+                data: { setLog_id: newDailyBest.id }
+              });
+            } else {
+              // Create
+              await ctx.prisma.dailyPersonalBests.create({
+                data: {
+                  user_id: user.id,
+                  exercise_id: newDailyBest.exercise_id,
+                  setLog_id: newDailyBest.id 
+                }
+              });
+            }
+          }
         }
       } catch (error) {
         console.log("Error processing request", error);
       }
   }),
+
+  getUserExerciseAllTimeBests: protectedProcedure
+    .query(async({ ctx }) => {
+      const user: AppUser = await ctx.prisma.appUser.findFirstOrThrow({
+        where: {
+          auth_uid: ctx.authUser?.id
+        }
+      })
+
+      if (!user) {
+        return
+      }
+
+      return await ctx.prisma.alltimePersonalBests.findMany({
+        include: { 
+          Exercise: true,
+          SetLog: true
+        },
+        where: {
+          user_id: user.id
+        }
+      })
+  }),
+
+  getUserExerciseDailyBests: protectedProcedure
+    .query(async({ ctx }) => {
+      const user: AppUser = await ctx.prisma.appUser.findFirstOrThrow({
+        where: {
+          auth_uid: ctx.authUser?.id
+        }
+      })
+
+      if (!user) {
+        return
+      }
+
+      return await ctx.prisma.dailyPersonalBests.findMany({
+        include: { 
+          Exercise: true,
+          SetLog: true
+        },
+        where: {
+          user_id: user.id
+        }
+      })
+  }),
+
+  // THIS ONLY WORKS FOR LOGGING, THIS WONT BATCH UPDATE ALL PREVIOUS DAILY BESTS
+  updateDailyAndPersonalBests: protectedProcedure
+    .input(
+      z.object({
+        exercise_ids: z.array(z.string())
+      }))
+    .mutation(async({ ctx, input }) => {
+      const { exercise_ids } = input
+      const user: AppUser = await ctx.prisma.appUser.findFirstOrThrow({
+        where: {
+          auth_uid: ctx.authUser?.id
+        }
+      })
+
+      if (!user) {
+        return
+      }
+     
+      for (const exercise_id of exercise_ids) {
+        const alltimeBest = await ctx.prisma.alltimePersonalBests.findFirst({
+          where: {
+            AppUser: {
+              auth_uid: ctx.authUser.id
+            },
+            exercise_id: exercise_id
+          },
+          include: {
+            SetLog: true
+          }
+        })
+        // Get today
+        const today = new Date()
+        const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+        const dailyBest = await ctx.prisma.dailyPersonalBests.findFirst({
+          where: {
+            AppUser: {
+              auth_uid: ctx.authUser.id
+            },
+            exercise_id: exercise_id,
+            created_at: {
+              gte: startOfDay,
+              lte: endOfDay
+            }
+          },
+          include: {
+            SetLog: true
+          }
+        })
+
+        const sets = await ctx.prisma.setLog.findMany({
+          where: {
+            exercise_id: exercise_id
+          }
+        })
+
+        let newDailyBest = dailyBest?.SetLog ?? null;
+        let newAlltimeBest = alltimeBest?.SetLog ?? null;
+      
+        for (const set of sets) {
+          if (!newAlltimeBest) {
+            newAlltimeBest = set;
+          } else if (isBetterSet(set, newAlltimeBest)) {
+            newAlltimeBest = set;
+          }
+      
+          if (!newDailyBest) {
+            newDailyBest = set;
+          } else if (isBetterSet(set, newDailyBest)) {
+            newDailyBest = set;
+          }
+        }
+      
+        // Update the database with newDailyBest and newAlltimeBest if they've changed
+        if (!!newAlltimeBest) {
+          const existingRecord = await ctx.prisma.alltimePersonalBests.findFirst({
+            where: {
+              user_id: user.id,
+              exercise_id: newAlltimeBest.exercise_id
+            }
+          });
+          
+          if (existingRecord) {
+            // Update
+            await ctx.prisma.alltimePersonalBests.update({
+              where: { id: existingRecord.id },
+              data: { setLog_id: newAlltimeBest.id }
+            });
+          } else {
+            // Create
+            await ctx.prisma.alltimePersonalBests.create({
+              data: {
+                user_id: user.id,
+                exercise_id: newAlltimeBest.exercise_id,
+                setLog_id: newAlltimeBest.id 
+              }
+            });
+          }
+        }
+
+        if (!!newDailyBest) {
+          const existingRecord = await ctx.prisma.dailyPersonalBests.findFirst({
+            where: {
+              user_id: user.id,
+              exercise_id: newDailyBest.exercise_id,
+              created_at: {
+                gte: startOfDay,
+                lte: endOfDay
+              }
+            }
+          });
+          
+          if (existingRecord) {
+            // Update
+            await ctx.prisma.dailyPersonalBests.update({
+              where: { id: existingRecord.id },
+              data: { setLog_id: newDailyBest.id }
+            });
+          } else {
+            // Create
+            await ctx.prisma.dailyPersonalBests.create({
+              data: {
+                user_id: user.id,
+                exercise_id: newDailyBest.exercise_id,
+                setLog_id: newDailyBest.id 
+              }
+            });
+          }
+        }
+      }
+    }),
 
   getUserWorkoutHistory: protectedProcedure
     .query(async ({ ctx }) => {
