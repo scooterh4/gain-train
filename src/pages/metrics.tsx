@@ -23,7 +23,7 @@ export default function Metrics() {
           Daily bests
           { !!exerciseDailyBests && exerciseDailyBests.map(exer => 
             <div key={exer.id} className="my-2 ml-6">
-              <p>{exer.day.toDateString()}</p>
+              <p>{exer.day.getMonth() + 1}/{exer.day.getDate()}/{exer.day.getFullYear()}</p>
               <p>{exer.Exercise.exercise_name}</p>
               <p>Best: {exer.SetLog.weight}lbs x {exer.SetLog.reps}reps</p>
             </div>

@@ -102,7 +102,7 @@ export const userRouter = createTRPCRouter({
        
         // Get personal bests
         const startOfDay = new Date()
-        startOfDay.setHours(0, 0, 0, 0)
+        startOfDay.setHours(-8, 0, 0, 0) // set to GMT so we can compare to day column in dailyPersonalBests
         const endOfDay = new Date()
         endOfDay.setHours(23, 59, 59, 59)
         const dailyPersonalBests = await ctx.prisma.dailyPersonalBests.findMany({
@@ -142,9 +142,6 @@ export const userRouter = createTRPCRouter({
               notes: ""
             }
           })
-          
-          const dailyBest = dailyPersonalBests.find(best => best.exercise_id === exer.exercise.id && best.day === startOfDay)
-          const exerAlltimeBest = alltimeBests.find(best => best.exercise_id === exer.exercise.id) 
 
           const setsToCreate: {
             exercise_id: string;
@@ -176,6 +173,9 @@ export const userRouter = createTRPCRouter({
               set_num: index + 1 
             }
           }) 
+
+          const dailyBest = dailyPersonalBests.find(best => best.exercise_id === exer.exercise.id && best.day.toUTCString() === startOfDay.toUTCString())
+          const exerAlltimeBest = alltimeBests.find(best => best.exercise_id === exer.exercise.id) 
 
           let newDailyBestSet: SetLog | undefined = dailyBest?.SetLog
           let newAlltimeBestSet: SetLog | undefined = exerAlltimeBest?.SetLog
@@ -219,12 +219,14 @@ export const userRouter = createTRPCRouter({
     
             // Update the database with newDailyBest if they've changed
             if (!!newDailyBestSet) {
+              const day = new Date()
+              day.setHours(0, 0, 0, 0)
               await ctx.prisma.dailyPersonalBests.upsert({
                 where: {
                   user_exercise_day_id: {
                     user_id: user.id,
                     exercise_id: exerciseId, 
-                    day: startOfDay  
+                    day: day  
                   }
                 },
                 update: { setLog_id: newDailyBestSet.id },
