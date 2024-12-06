@@ -111,7 +111,7 @@ export const WorkoutDialog = ({
   };
 
   const updateSetDataForExercise = (exercise: ExerciseDisplay, set_num: number, type: "weight" | "reps", value: string) => {
-    const numberValue = parseInt(value)
+    const numberValue = isNaN(parseInt(value)) ? null : parseInt(value)
     console.log("numberValue", numberValue)
 
     setWorkoutExercises(prev => prev.map(ex => { 
