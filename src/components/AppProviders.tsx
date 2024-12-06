@@ -28,7 +28,6 @@ export const RouteProvider = ({
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("RouteProvider session:", session)
       if (["INITIAL_SESSION", "SIGNED_IN", "SIGNED_OUT"].includes(event)) {
         setIsLoggedIn(!!session);
         if (session && publicRoutes.includes(router.pathname)) {
@@ -73,8 +72,6 @@ export const AuthProvider = (props: AuthProviderProps) => {
     })
   );
 
-  console.log("AuthProvider supabaseClient:", supabaseClient)
-  
   return (
     <SessionContextProvider
       supabaseClient={supabaseClient}
