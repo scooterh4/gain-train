@@ -10,7 +10,7 @@ datasource db {
 }
 
 model AlltimePersonalBests {
-  id          String   @id @default(cuid())
+  id          String   @default(cuid())
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   user_id     String
@@ -20,7 +20,7 @@ model AlltimePersonalBests {
   Exercise    Exercise @relation(fields: [exercise_id], references: [id])
   SetLog      SetLog   @relation(fields: [setLog_id], references: [id])
 
-  @@unique([user_id, exercise_id])
+  @@id(name: "user_exercise_id", [user_id, exercise_id])
   @@index([user_id])
   @@index([exercise_id])
 }
@@ -39,9 +39,10 @@ model AppUser {
 }
 
 model DailyPersonalBests {
-  id          String   @id @default(cuid())
+  id          String   @default(cuid())
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
+  day         DateTime @default(now()) @db.Date
   user_id     String
   exercise_id String
   setLog_id   String   @unique
@@ -49,6 +50,7 @@ model DailyPersonalBests {
   Exercise    Exercise @relation(fields: [exercise_id], references: [id])
   SetLog      SetLog   @relation(fields: [setLog_id], references: [id])
 
+  @@id(name: "user_exercise_day_id", [day, exercise_id, user_id])
   @@index([user_id])
   @@index([exercise_id])
 }
