@@ -73,6 +73,8 @@ export const AuthProvider = (props: AuthProviderProps) => {
     })
   );
 
+  console.log("AuthProvider supabaseClient:", supabaseClient)
+  
   return (
     <SessionContextProvider
       supabaseClient={supabaseClient}
