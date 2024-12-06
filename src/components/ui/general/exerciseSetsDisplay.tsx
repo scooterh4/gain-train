@@ -1,12 +1,12 @@
 import { TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "../table";
 import { Input } from "../input";
-import { api } from "~/utils/api";
+import { api } from "../../../utils/api";
 import { useContext, useEffect } from "react";
 import { Button } from "../button";
 import { CircleEllipsisIcon, Trash2Icon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../dropdown-menu";
 import { type ExerciseDisplay, WorkoutContext } from "./workoutDialog";
-import { getEmptySet, getPrevSetMessage } from "~/lib/utils";
+import { getEmptySet, getPrevSetMessage } from "../../../lib/utils";
 
 export type DisplaySet = {
   prev_set: string,
@@ -17,8 +17,8 @@ export type DisplaySet = {
 }
 
 export enum ExerciseTypes {
-  normal_weighted = '123f879wfe=fw9ew87',
-  weighted_bodyweight = 'nasdklfsda9f7348hu'
+  normal_weighted = '12asdf3=23=4-523-',
+  weighted_bodyweight = 'asjhfihni2134=30i2r'
 }
 
 export const ExerciseTableDisplay = ({

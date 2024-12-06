@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from "../dialog";
 import { Button } from "../button";
 import { X } from "lucide-react";
 import { AddNewExerciseDialog } from "./addNewExerciseDialog";
-import { api } from "~/utils/api";
+import { api } from "../../../utils/api";
 import { type Exercise } from "@prisma/client";
 
 export const ExercisesDialog = ({

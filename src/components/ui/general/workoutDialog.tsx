@@ -5,9 +5,9 @@ import { X } from "lucide-react";
 import { ExercisesDialog } from "./exercisesDialog";
 import { type DisplaySet, ExerciseTableDisplay, ExerciseTypes } from "./exerciseSetsDisplay";
 import { Table } from "../table";
-import { api } from "~/utils/api";
+import { api } from "../../../utils/api";
 import { type Exercise } from "@prisma/client";
-import { getEmptySet } from "~/lib/utils";
+import { getEmptySet } from "../../../lib/utils";
 
 export interface ExerciseDisplay extends Exercise {
   addedAt: number
@@ -111,7 +111,7 @@ export const WorkoutDialog = ({
   };
 
   const updateSetDataForExercise = (exercise: ExerciseDisplay, set_num: number, type: "weight" | "reps", value: string) => {
-    const numberValue = parseInt(value)
+    const numberValue = isNaN(parseInt(value)) ? null : parseInt(value)
     console.log("numberValue", numberValue)
 
     setWorkoutExercises(prev => prev.map(ex => { 

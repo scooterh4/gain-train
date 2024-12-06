@@ -64,7 +64,7 @@ export default function History() {
         </>
         {hasNextPage && (
           <Button 
-            className="text-white bg-red" 
+            className="text-black bg-white" 
             onClick={ loadMoreWorkouts }>
             Load more workouts
           </Button> 

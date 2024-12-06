@@ -10,16 +10,17 @@ datasource db {
 }
 
 model AlltimePersonalBests {
-  id          String    @id @default(cuid())
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  user_id     String    
-  exercise_id String    
-  setLog_id   String    @unique
-  AppUser     AppUser   @relation(fields: [user_id], references: [id])
+  id          String   @default(cuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  user_id     String
+  exercise_id String   @unique 
+  setLog_id   String   @unique
+  AppUser     AppUser  @relation(fields: [user_id], references: [id])
   Exercise    Exercise @relation(fields: [exercise_id], references: [id])
-  SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
+  SetLog      SetLog   @relation(fields: [setLog_id], references: [id])
 
+  @@id(name: "user_exercise_id", [user_id, exercise_id])
   @@index([user_id])
   @@index([exercise_id])
 }
@@ -38,16 +39,18 @@ model AppUser {
 }
 
 model DailyPersonalBests {
-  id          String    @id @default(cuid())
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  user_id     String    
-  exercise_id String    
-  setLog_id   String    @unique
-  AppUser     AppUser   @relation(fields: [user_id], references: [id])
+  id          String   @default(cuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  day         DateTime @default(now()) @db.Date
+  user_id     String
+  exercise_id String
+  setLog_id   String   @unique
+  AppUser     AppUser  @relation(fields: [user_id], references: [id])
   Exercise    Exercise @relation(fields: [exercise_id], references: [id])
-  SetLog      SetLog    @relation(fields: [setLog_id], references: [id])
+  SetLog      SetLog   @relation(fields: [setLog_id], references: [id])
 
+  @@id(name: "user_exercise_day_id", [day, exercise_id, user_id])
   @@index([user_id])
   @@index([exercise_id])
 }
@@ -58,7 +61,7 @@ model Exercise {
   updated_at           DateTime               @updatedAt
   user_id              String
   exercise_name        String
-  exercise_type_id     String                 // Foreign key to the ExerciseType table
+  exercise_type_id     String
   AppUser              AppUser                @relation(fields: [user_id], references: [id])
   ExerciseType         ExerciseType           @relation(fields: [exercise_type_id], references: [id])
   ExerciseLog          ExerciseLog[]
@@ -74,13 +77,13 @@ model ExerciseLog {
   id            String     @id @default(cuid())
   created_at    DateTime   @default(now())
   updated_at    DateTime   @updatedAt
-  user_id       String     
-  workoutLog_id String     
+  user_id       String
+  workoutLog_id String
   exercise_id   String
   notes         String?
   AppUser       AppUser    @relation(fields: [user_id], references: [id])
   WorkoutLog    WorkoutLog @relation(fields: [workoutLog_id], references: [id])
-  Exercise      Exercise  @relation(fields: [exercise_id], references: [id])
+  Exercise      Exercise   @relation(fields: [exercise_id], references: [id])
   SetLog        SetLog[]
 
   @@index([user_id])
@@ -90,24 +93,23 @@ model ExerciseLog {
 
 model ExerciseType {
   id              String     @id @default(cuid())
-  name            String     // e.g., "normal_weighted" or "weighted_bodyweight"
-  requires_weight Boolean    // Indicates if weight is required
-  requires_reps   Boolean    // Indicates if reps are required
-
-  Exercise       Exercise[]
+  name            String
+  requires_weight Boolean
+  requires_reps   Boolean
+  Exercise        Exercise[]
 }
 
 model SetLog {
-  id                   String                 @id @default(cuid())
-  created_at           DateTime               @default(now())
-  updated_at           DateTime               @updatedAt
-  exercise_id          String                 
-  exerciseLog_id       String                 
+  id                   String                @id @default(cuid())
+  created_at           DateTime              @default(now())
+  updated_at           DateTime              @updatedAt
+  exercise_id          String
+  exerciseLog_id       String
   set_num              Int
-  weight               Int?                   // Optional weight for bodyweight exercises
+  weight               Int?
   reps                 Int
-  Exercise             Exercise               @relation(fields: [exercise_id], references: [id])
-  ExerciseLog          ExerciseLog            @relation(fields: [exerciseLog_id], references: [id])
+  Exercise             Exercise              @relation(fields: [exercise_id], references: [id])
+  ExerciseLog          ExerciseLog           @relation(fields: [exerciseLog_id], references: [id])
   AlltimePersonalBests AlltimePersonalBests?
   DailyPersonalBests   DailyPersonalBests?
 
@@ -116,15 +118,15 @@ model SetLog {
 }
 
 model WorkoutLog {
-  id               String        @id @default(cuid())
-  created_at       DateTime      @default(now())
-  started_at       DateTime
-  ended_at         DateTime      @default(now())
-  user_id          String        
-  workout_name     String
-  notes            String?
-  AppUser          AppUser       @relation(fields: [user_id], references: [id])
-  ExerciseLog      ExerciseLog[]
+  id           String        @id @default(cuid())
+  created_at   DateTime      @default(now())
+  user_id      String
+  workout_name String
+  notes        String?
+  started_at   DateTime
+  ended_at     DateTime      @default(now())
+  AppUser      AppUser       @relation(fields: [user_id], references: [id])
+  ExerciseLog  ExerciseLog[]
 
   @@index([user_id])
 }
