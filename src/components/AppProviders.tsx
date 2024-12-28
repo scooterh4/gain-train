@@ -66,7 +66,7 @@ export const AuthProvider = (props: AuthProviderProps) => {
         sameSite: "lax",
         domain:
           process.env.NODE_ENV === "production"
-            ? ".gmail.com"
+            ? ".vercel.app"
             : "localhost",
       },
     })
