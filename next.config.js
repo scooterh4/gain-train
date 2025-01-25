@@ -18,6 +18,19 @@ const config = {
     defaultLocale: "en",
   },
   transpilePackages: ["geist"],
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Permissions-Policy',
+            value: 'interest-cohort=(), browsing-topics=()',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default config;
