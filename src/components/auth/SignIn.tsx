@@ -15,7 +15,7 @@ export function SignIn({ pageTitle }: { pageTitle: string }) {
     const { error, data } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: (window.location.origin.includes('localhost') ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL) + "/api/auth/callback",
+        redirectTo: window.location.origin + "/api/auth/callback",
       },
     });
       if (error) throw error;
